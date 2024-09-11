@@ -1,51 +1,39 @@
 <template>
 	<view class="content">
-        <image class="logo" src="../../static/logo.png"></image>
-		<view>
-            <text class="title">{{title}}</text>
-        </view>
+		<u-swiper :list="banner"></u-swiper>
+		<Card class="photo-box" />
 	</view>
 </template>
 
 <script lang="ts">
-  import Vue from 'vue';
+import Vue from 'vue';
+import Card from '@/components/Card.vue'
+import { Component, Emit, Prop, Watch } from "vue-property-decorator";
 
-	export default Vue.extend({
-		data() {
-			return {
-				title: 'Hello'
-			}
-		},
-		onLoad() {
 
-		},
-		methods: {
 
-		}
-	});
+@Component({ components: { Card } })
+export default class Index extends Vue {
+	banner: Array<string> = [
+		'https://cdn.uviewui.com/uview/swiper/swiper1.png',
+		'https://cdn.uviewui.com/uview/swiper/swiper2.png',
+		'https://cdn.uviewui.com/uview/swiper/swiper3.png',
+	]
+}
 </script>
 
-<style>
-	.content {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-	}
+<style lang="scss" scoped>
+.content {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	background-color: #3303;
 
-	.logo {
-		height: 200rpx;
-		width: 200rpx;
-		margin: 200rpx auto 50rpx auto;
+	.photo-box {
+		height: 300rpx;
+		margin: 0 auto;
+		width: calc(100% - 20rpx);
 	}
-
-	.text-area {
-		display: flex;
-		justify-content: center;
-	}
-
-	.title {
-		font-size: 36rpx;
-		color: #8f8f94;
-	}
+}
 </style>
