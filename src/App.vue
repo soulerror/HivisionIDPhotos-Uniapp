@@ -4,9 +4,14 @@ export default Vue.extend({
     mpType: 'app',
     onLaunch() {
         console.log('App Launch')
+
     },
     onShow() {
         console.log('App Show')
+        // #ifndef APP-NVUE
+        uni.requireNativePlugin = () => { };
+        // #endif
+
     },
     onHide() {
         console.log('App Hide')
@@ -14,11 +19,6 @@ export default Vue.extend({
 });
 </script>
 
-<style>
+<style lang="scss">
 @import "uview-ui/index.scss";
-
-/* 让每个页面默认高度都是100% */
-page {
-    height: 100%;
-}
 </style>

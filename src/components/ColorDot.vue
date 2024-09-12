@@ -1,12 +1,16 @@
 <template>
-  <div class="cm-card">
+  <div class="cm-dot">
     <slot />
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import { Component, Emit, Prop, Watch } from "vue-property-decorator";
-export default class Index extends Vue {
+
+@Component
+export default class ColorDot extends Vue {
+  name: string = "color-dot"
+  @Prop(String) color: string = '#fff';
 
   @Emit('click')
   _click() {
@@ -16,7 +20,7 @@ export default class Index extends Vue {
 }
 </script>
 <style lang="scss" scoped>
-.cm-card {
+.cm-dot {
   border-radius: 10rpx;
   background-color: #fff;
   width: 100%;

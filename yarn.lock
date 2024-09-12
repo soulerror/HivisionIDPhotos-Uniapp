@@ -978,7 +978,7 @@
   resolved "https://registry.npmmirror.com/@babel/regjsgen/-/regjsgen-0.8.0.tgz#f0ba69b075e1f05fb2825b7fad991e7adbb18310"
   integrity sha512-x/rqGMdzj+fWZvCOYForTghzbtqPDZ5gPwaoNGHdgDfF2QA/XZbCBp4Moo5scrkAMPhB7z26XM/AaHuIJdgauA==
 
-"@babel/runtime@^7.12.13", "@babel/runtime@^7.3.1", "@babel/runtime@^7.7.2", "@babel/runtime@^7.8.4":
+"@babel/runtime@^7.12.13", "@babel/runtime@^7.17.2", "@babel/runtime@^7.3.1", "@babel/runtime@^7.7.2", "@babel/runtime@^7.8.4":
   version "7.25.6"
   resolved "https://registry.npmmirror.com/@babel/runtime/-/runtime-7.25.6.tgz#9afc3289f7184d8d7f98b099884c26317b9264d2"
   integrity sha512-VBj9MYyDb9tuLq7yzqjgzt6Q+IBQLrGZfdjOekyEirZPHxXWoTSGUTMrpsfi58Up73d13NfYLv8HT9vmznjzhQ==
@@ -4235,6 +4235,11 @@ copy-descriptor@^0.1.0:
   resolved "https://registry.npmmirror.com/copy-descriptor/-/copy-descriptor-0.1.1.tgz#676f6eb3c39997c2ee1ac3a924fd6124748f578d"
   integrity sha512-XgZ0pFcakEUlbwQEVNg3+QAis1FyTL3Qel9FYy8pSkQqoG3PNoT0bOCQtOXcOkur21r2Eq2kI+IE+gsmAEVlYw==
 
+copy-text-to-clipboard@^3.0.1:
+  version "3.2.0"
+  resolved "https://registry.npmmirror.com/copy-text-to-clipboard/-/copy-text-to-clipboard-3.2.0.tgz#0202b2d9bdae30a49a53f898626dcc3b49ad960b"
+  integrity sha512-RnJFp1XR/LOBDckxTib5Qjr/PMfkatD0MUCQgdpqS8MdKiNUzBjAQBEN6oUy+jW7LI93BBG3DtMB2KOOKpGs2Q==
+
 copy-to@^2.0.1:
   version "2.0.1"
   resolved "https://registry.npmmirror.com/copy-to/-/copy-to-2.0.1.tgz#2680fbb8068a48d08656b6098092bdafc906f4a5"
@@ -4259,7 +4264,7 @@ core-js-compat@^3.37.1, core-js-compat@^3.38.0, core-js-compat@^3.8.3:
   dependencies:
     browserslist "^4.23.3"
 
-core-js@^3.4.1, core-js@^3.8.3:
+core-js@^3.11.0, core-js@^3.4.1, core-js@^3.8.3:
   version "3.38.1"
   resolved "https://registry.npmmirror.com/core-js/-/core-js-3.38.1.tgz#aa375b79a286a670388a1a363363d53677c0383e"
   integrity sha512-OP35aUorbU3Zvlx7pjsFdu1rGNnD4pgw/CWoYzRY3t2EzoVT7shKHY1dlAy3f41cGIO7ZDPQimhGFTlEYkG/Hw==
@@ -7870,6 +7875,11 @@ mustache@^4.2.0:
   resolved "https://registry.npmmirror.com/mustache/-/mustache-4.2.0.tgz#e5892324d60a12ec9c2a73359edca52972bf6f64"
   integrity sha512-71ippSywq5Yb7/tVYyGbkBggbU8H3u5Rz56fH60jGFgr8uHwxs+aSKeqmluIVzM0m0kB7xQjKS6qPfd0b2ZoqQ==
 
+mutation-observer@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.npmmirror.com/mutation-observer/-/mutation-observer-1.0.3.tgz#42e9222b101bca82e5ba9d5a7acf4a14c0f263d0"
+  integrity sha512-M/O/4rF2h776hV7qGMZUH3utZLO/jK7p8rnNgGkjKUw8zCGjRQPxB8z6+5l8+VjRUQ3dNYu4vjqXYLr+U8ZVNA==
+
 mz@^2.4.0:
   version "2.7.0"
   resolved "https://registry.npmmirror.com/mz/-/mz-2.7.0.tgz#95008057a56cafadc2bc63dde7f9ff6955948e32"
@@ -10843,6 +10853,16 @@ vary@^1.1.2, vary@~1.1.2:
   version "1.1.2"
   resolved "https://registry.npmmirror.com/vary/-/vary-1.1.2.tgz#2299f02c6ded30d4a5961b0b9f74524a18f634fc"
   integrity sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==
+
+vconsole@^3.15.1:
+  version "3.15.1"
+  resolved "https://registry.npmmirror.com/vconsole/-/vconsole-3.15.1.tgz#569a8ab15f353259527bbcf004f02946b4482cff"
+  integrity sha512-KH8XLdrq9T5YHJO/ixrjivHfmF2PC2CdVoK6RWZB4yftMykYIaXY1mxZYAic70vADM54kpMQF+dYmvl5NRNy1g==
+  dependencies:
+    "@babel/runtime" "^7.17.2"
+    copy-text-to-clipboard "^3.0.1"
+    core-js "^3.11.0"
+    mutation-observer "^1.0.3"
 
 verror@1.10.0:
   version "1.10.0"

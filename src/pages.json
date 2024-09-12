@@ -8,6 +8,19 @@
 			"style": {
 				"navigationBarTitleText": "免费证件照制作"
 			}
+		},
+		{
+			"path": "pages/photo/index",
+			"style": {
+				"navigationBarTitleText": "免费证件照制作"
+			}
+		}
+		,
+		{
+			"path": "pages/photo/edit",
+			"style": {
+				"navigationBarTitleText": "免费证件照制作"
+			}
 		}
 	],
 	"globalStyle": {
