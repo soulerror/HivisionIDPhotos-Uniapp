@@ -2,14 +2,12 @@
   <view class="content">
     <!-- 预览遮罩 -->
     <u-overlay :show="show" @click="show = false">
-      <u-image :src="this.preview" mode="aspectFit" width="100%"></u-image>
-      <u-button type="warning" class="bottom-box-btn" :plain="true" color="#f9ae3d"
-        @click="confirmSelect">确认选择</u-button>
+      <u-button type="warning" class="bottom-box-btn" :plain="true" color="#f9ae3d" @click="confirmSelect">确认选择</u-button>
     </u-overlay>
-
-    <Card class="photo-box" @click.native="chooseImage">
-      <u-image :src="this.preview" mode="aspectFit" width="100%"></u-image>
-    </Card>
+    <div>
+      <p>一寸标准证件照</p>
+      <p>冲印尺寸:25mm x 35 mm </p>
+    </div> 
     <!-- 照片选择 -->
     <div class="bottom-box">
       <u-button type="warning" class="bottom-box-btn" :plain="true" color="#f9ae3d"
@@ -29,11 +27,6 @@ import { GeneratePhoto } from '@/api/photo'
 
 @Component({ components: { Card } })
 export default class PhotoIndex extends Vue {
-  banner: Array<string> = [
-    'https://cdn.uviewui.com/uview/swiper/swiper1.png',
-    'https://cdn.uviewui.com/uview/swiper/swiper2.png',
-    'https://cdn.uviewui.com/uview/swiper/swiper3.png',
-  ]
   form: AnyObject = {
     height: 413,
     width: 295,
@@ -60,7 +53,9 @@ export default class PhotoIndex extends Vue {
       count: 1,
       sourceType: [type],
       success: (res) => {
-        this.preview = res.tempFilePaths[0];
+        const path = res.tempFilePaths[0];
+        console.log(path);
+        this.form.file = path
         // 获取选择的文件路径
         this.show = true
       }
@@ -73,8 +68,8 @@ export default class PhotoIndex extends Vue {
       mediaType: ['image'],
       sourceType: [type],
       success: (res) => {
-        this.form.file = res.tempFiles[0];
-        this.preview = res.tempFiles[0].tempFilePath
+        const path = res.tempFiles[0].tempFilePath
+        this.form.file = path
         this.show = true
       }
     });
@@ -91,7 +86,9 @@ export default class PhotoIndex extends Vue {
    */
   async confirmSelect() {
     this.loading = true
-    await GeneratePhoto(this.form).then(res => this.preview = res).catch(err => console.log(err)).finally(() => this.loading = false)
+    await GeneratePhoto(this.form).then(res => this.preview = res)
+      .catch(err => console.log(err))
+    this.loading = false
     uni.setStorageSync('photo-url', this.preview)
     uni.navigateTo({
       url: '/pages/photo/edit'

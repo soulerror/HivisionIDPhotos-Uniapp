@@ -76,6 +76,7 @@ export const uploadFile = <T>(url: string, options: RequestOptions = { method: M
   const { data, gateway } = options;
   const filePath = data['file']
   delete data['file']
+  console.log(filePath,'`1`');
   return new Promise<any>((resolve, reject) => {
     uni.uploadFile({
       url: gateway ? baseUrl + gateway + url : baseUrl + url,

@@ -1,12 +1,26 @@
 <template>
 	<view class="content">
+		<div class="banner-box">
+			<u-swiper :list="banners" class="banner"></u-swiper>
+		</div>
+		<div class="tool-box">
+			<Card @click="skipTo" class="size-1-card">
+				<u-image src="https://icuzz-media.oss-cn-chengdu.aliyuncs.com/photo/image.jpeg" class="example-image"
+					width="80px" height="100px" />
+				<p>一寸照</p>
+			</Card>
+			<div class="size-other-box">
+				<Card class="size-2-card">二寸照</Card>
+				<Card class="size-2-card">更多尺寸</Card>
+			</div>
+		</div>
 		<Card class="photo-box" @click.native="chooseImage">
-			<u-image :src="preview" mode="aspectFit" width="100%" @ckick="chooseImage"></u-image>
-			<!-- <u-upload ref="uUpload" accept="image" maxCount="1" :auto-upload="false" name="file" @afterRead="onSelectFile">
-			</u-upload> -->
+			<Card>一寸照</Card>
+			<Card>一寸照</Card>
+			<Card>一寸照</Card>
+			<Card>一寸照</Card>
+			<Card>一寸照</Card>
 		</Card>
-		<u-button @click="submit">提交</u-button>
-		<u-button @click="skipTo">提交</u-button>
 	</view>
 </template>
 
@@ -19,7 +33,7 @@ import { GeneratePhoto } from '@/api/photo'
 
 @Component({ components: { Card } })
 export default class Index extends Vue {
-	banner: Array<string> = [
+	banners: Array<string> = [
 		'https://cdn.uviewui.com/uview/swiper/swiper1.png',
 		'https://cdn.uviewui.com/uview/swiper/swiper2.png',
 		'https://cdn.uviewui.com/uview/swiper/swiper3.png',
@@ -72,14 +86,66 @@ export default class Index extends Vue {
 <style lang="scss" scoped>
 .content {
 	height: 100%;
+	width: 100%;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 
+	.banner-box {
+		width: 100%;
+		height: 300rpx;
+	}
+
+	.banner {
+		width: 100% !important;
+		height: 300rpx;
+	}
+
+	.tool-box {
+		width: 100%;
+		text-align: initial;
+		position: relative;
+		top: -60rpx;
+		width: calc(100% - 80rpx);
+		display: flex;
+		gap: 40rpx;
+
+		p {
+			margin: 10rpx 10rpx 10rpx 1em;
+		}
+
+
+
+		.size-1-card {
+			height: 300rpx;
+			width: 300rpx;
+			padding: 30rpx;
+			box-sizing: border-box;
+
+			.example-image {
+				width: 100rpx;
+				height: 160rpx;
+			}
+		}
+
+		.size-other-box{
+			display: flex;
+			flex-direction: column;
+			gap:40rpx;
+			flex:1;
+		}
+
+		.size-2-card {
+			width: 100%;
+			height: 130rpx;
+			padding: 30rpx;
+		}
+	}
+
 	.photo-box {
 		height: 300rpx;
-		margin: 0 auto;
-		width: calc(100% - 20rpx);
+		margin: 10rpx auto;
+		width: calc(100% - 80rpx);
 	}
 }
 </style>
