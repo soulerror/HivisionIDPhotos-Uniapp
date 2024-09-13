@@ -21,7 +21,6 @@ export default class Card extends Vue {
   background-color: #fff;
   width: 100%;
   box-shadow: none;
-  padding: 10rpx;
   box-sizing: border-box;
 }
-</style>  
+</style>

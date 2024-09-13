@@ -1,18 +1,60 @@
 <template>
-  <view class="content">
+  <view class="photo-select">
     <!-- 预览遮罩 -->
     <u-overlay :show="show" @click="show = false">
-      <u-button type="warning" class="bottom-box-btn" :plain="true" color="#f9ae3d" @click="confirmSelect">确认选择</u-button>
+      <div class="preview-box">
+        <u-image :src="form.file" mode="aspectFit" height="1000rpx" radius="10rpx"></u-image>
+      </div>
+      <u-button type=" warning" class="bottom-box-btn" :custom-style="{ width: '240rpx', borderRadius: '20rpx' }"
+        :plain="true" color="#f9ae3d" @click="confirmSelect">确认选择</u-button>
     </u-overlay>
-    <div>
-      <p>一寸标准证件照</p>
-      <p>冲印尺寸:25mm x 35 mm </p>
-    </div> 
+    <div class="photo-select-box">
+      <div class="photo-select-box-title">一寸证件照</div>
+      <div class="photo-select-box-desc">
+        <div>
+          <p>25 x 35 mm</p>
+          <p>冲印尺寸</p>
+        </div>
+        <div>
+          <p>295 x 413 px</p>
+          <p>像素大小</p>
+        </div>
+        <div>
+          <p>
+            300 DPI
+          </p>
+          <p>分辨率</p>
+        </div>
+      </div>
+      <div class="photo-select-card">
+        <div>支持保存电子照 <u-icon name="checkmark-circle-fill" color="#5ac725" /></div>
+        <div>支持保存电子排版照 <u-icon name="checkmark-circle-fill" color="#5ac725" /></div>
+        <div>背景色
+          <div class="color-dot-box">
+            <ColorDot color="#D9001B" class="color-dot" />
+            <ColorDot color="#02A7F0" class="color-dot" />
+            <ColorDot color="#FFFFFF" class="color-dot" />
+            <ColorDot color="#3492C4" class="color-dot" />
+            <ColorDot color="#3D99E2" class="color-dot" />
+          </div>
+        </div>
+        <div>文件大小 <span>KB</span></div>
+        <div>文件格式 <span>JPG</span></div>
+      </div>
+      <div class="photo-select-card">
+        <div>拍照建议</div>
+        <div>1.放松身体，挺胸抬头，两眼平视前方</div>
+        <div>2.去掉发饰、眼镜，露出耳朵</div>
+        <div>3.着深色衣服，在白色背景墙前成像效果最佳</div>
+        <div>4.人像尽量保证在照片中间</div>
+      </div>
+    </div>
     <!-- 照片选择 -->
     <div class="bottom-box">
-      <u-button type="warning" class="bottom-box-btn" :plain="true" color="#f9ae3d"
+      <u-button type="warning" :custom-style="{ width: '240rpx', borderRadius: '20rpx' }" :plain="true" color="#f9ae3d"
         @click="chooseImage('album')">去相册选择</u-button>
-      <u-button type="warning" class="bottom-box-btn" @click="chooseImage('camera')">去拍照</u-button>
+      <u-button type="warning" :custom-style="{ width: '240rpx', borderRadius: '20rpx' }"
+        @click="chooseImage('camera')">去拍照</u-button>
     </div>
     <!-- 加载页 -->
     <u-loading-page :loading="loading"></u-loading-page>
@@ -22,10 +64,11 @@
 <script lang="ts">
 import Vue from 'vue';
 import Card from '@/components/Card.vue'
+import ColorDot from '@/components/ColorDot.vue'
 import { Component } from "vue-property-decorator";
 import { GeneratePhoto } from '@/api/photo'
 
-@Component({ components: { Card } })
+@Component({ components: { Card, ColorDot } })
 export default class PhotoIndex extends Vue {
   form: AnyObject = {
     height: 413,
@@ -54,7 +97,6 @@ export default class PhotoIndex extends Vue {
       sourceType: [type],
       success: (res) => {
         const path = res.tempFilePaths[0];
-        console.log(path);
         this.form.file = path
         // 获取选择的文件路径
         this.show = true
@@ -111,11 +153,80 @@ export default class PhotoIndex extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.content {
+$page-padding: 20rpx;
+
+.photo-select {
   height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  padding: 0 40rpx;
+
+  &-box {
+    height: calc(100% - 150rpx);
+    overflow: hidden;
+    overflow-y: scroll;
+
+
+    &-title {
+      width: 100%;
+      border-bottom: 1px solid #DCDFE6;
+      line-height: 120rpx;
+      font-size: 50rpx;
+      font-weight: bold;
+    }
+
+    &-desc {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      line-height: 20px;
+      padding: 10rpx 0;
+
+      div {
+        width: 33.3%;
+        text-align: center;
+        border-left: 1px solid #DCDFE6;
+        line-height: 30rpx;
+
+        &>p:first-child {
+          font-weight: bold;
+          font-size: 0.8rem;
+        }
+
+        &>p:last-child {
+          color: #909399;
+        }
+      }
+
+      &>div:first-child {
+        border: none;
+      }
+    }
+  }
+
+
+  &-card {
+    margin: 20rpx 0 40rpx 0;
+    padding: 60rpx 40rpx;
+    border-radius: 16rpx;
+    background-color: #EBEEF5;
+    color: #909399;
+    display: flex;
+    flex-direction: column;
+    gap: 40rpx;
+
+    div {
+      display: flex;
+      justify-content: space-between;
+    }
+
+
+    .color-dot {
+      height: 30rpx;
+      width: 30rpx;
+      margin: 0 6rpx;
+    }
+  }
 
   .photo-box {
     height: 300rpx;
@@ -124,15 +235,21 @@ export default class PhotoIndex extends Vue {
   }
 
   .bottom-box {
-    height: 100rpx;
+    height: 140rpx;
     display: flex;
     gap: 40rpx;
     white-space: nowrap;
+    // border-top: 1px solid $theme-color;
+    padding: 20rpx 0;
+    box-sizing: border-box;
+  }
 
-    &-btn {
-      border-radius: 20rpx;
-      width: 240rpx;
-    }
+  .preview-box {
+    height: calc(100% - 200rpx);
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    align-items: center;
   }
 }
 </style>

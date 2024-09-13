@@ -18,8 +18,6 @@ const request = <T>(url: string, options: RequestOptions = { method: Method.GET 
     const token = tokenStr && tokenStr.length > 0 ? { Authorization: tokenStr } : {};
     //加载动画
     loading && uni.showLoading();
-
-    debugger
     uni.request({
       url: gateway ? baseUrl + gateway + url : baseUrl + url,
       method,
@@ -76,13 +74,19 @@ export const uploadFile = <T>(url: string, options: RequestOptions = { method: M
   const { data, gateway } = options;
   const filePath = data['file']
   delete data['file']
-  console.log(filePath,'`1`');
+  let formData = {}
+  // #ifdef MP-WEIXIN
+  formData = JSON.stringify(data)
+  // #endif
+  // #ifdef H5
+  formData = data
+  // #endif
   return new Promise<any>((resolve, reject) => {
     uni.uploadFile({
       url: gateway ? baseUrl + gateway + url : baseUrl + url,
       filePath: filePath,
       name: 'input_image',
-      formData: data,
+      formData: formData,
       success: ({ data }) => {
         resolve('data:image/png;base64,' + JSON.parse(data).image_base64_standard)
       },

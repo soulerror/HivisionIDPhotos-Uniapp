@@ -4,23 +4,23 @@
 			<u-swiper :list="banners" class="banner"></u-swiper>
 		</div>
 		<div class="tool-box">
-			<Card @click="skipTo" class="size-1-card">
+			<div @click="skipTo" class="size-1-card">
 				<u-image src="https://icuzz-media.oss-cn-chengdu.aliyuncs.com/photo/image.jpeg" class="example-image"
 					width="80px" height="100px" />
 				<p>一寸照</p>
-			</Card>
+			</div>
 			<div class="size-other-box">
-				<Card class="size-2-card">二寸照</Card>
-				<Card class="size-2-card">更多尺寸</Card>
+				<div class="size-2-card">二寸照</div>
+				<div class="size-2-card">更多尺寸</div>
 			</div>
 		</div>
-		<Card class="photo-box" @click.native="chooseImage">
-			<Card>一寸照</Card>
-			<Card>一寸照</Card>
-			<Card>一寸照</Card>
-			<Card>一寸照</Card>
-			<Card>一寸照</Card>
-		</Card>
+		<div class="photo-box" @click="chooseImage">
+			<div>一寸照</div>
+			<div>一寸照</div>
+			<div>一寸照</div>
+			<div>一寸照</div>
+			<div>一寸照</div>
+		</div>
 	</view>
 </template>
 
@@ -90,6 +90,8 @@ export default class Index extends Vue {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	background-color: #f2f5f6;
+
 
 	.banner-box {
 		width: 100%;
@@ -102,25 +104,20 @@ export default class Index extends Vue {
 	}
 
 	.tool-box {
-		width: 100%;
-		text-align: initial;
 		position: relative;
 		top: -60rpx;
 		width: calc(100% - 80rpx);
 		display: flex;
-		gap: 40rpx;
-
-		p {
-			margin: 10rpx 10rpx 10rpx 1em;
-		}
-
-
+		justify-content: space-between;
 
 		.size-1-card {
 			height: 300rpx;
-			width: 300rpx;
+			width: 280rpx;
 			padding: 30rpx;
 			box-sizing: border-box;
+			border-radius: 20rpx;
+			background-color: #fff;
+
 
 			.example-image {
 				width: 100rpx;
@@ -128,17 +125,21 @@ export default class Index extends Vue {
 			}
 		}
 
-		.size-other-box{
+		.size-other-box {
+			height: 300rpx;
+			width: 360rpx;
 			display: flex;
 			flex-direction: column;
-			gap:40rpx;
-			flex:1;
+			gap: 40rpx;
 		}
 
 		.size-2-card {
 			width: 100%;
 			height: 130rpx;
 			padding: 30rpx;
+			box-sizing: border-box;
+			border-radius: 20rpx;
+			background-color: #fff;
 		}
 	}
 
