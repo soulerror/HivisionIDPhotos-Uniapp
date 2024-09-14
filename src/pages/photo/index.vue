@@ -9,19 +9,19 @@
         :plain="true" color="#f9ae3d" @click="confirmSelect">确认选择</u-button>
     </u-overlay>
     <div class="photo-select-box">
-      <div class="photo-select-box-title">一寸证件照</div>
+      <div class="photo-select-box-title">{{ photoSize.name }}</div>
       <div class="photo-select-box-desc">
         <div>
-          <p>25 x 35 mm</p>
+          <p>{{ photoSize.mmWidth }} x {{ photoSize.mmHeight }} mm</p>
           <p>冲印尺寸</p>
         </div>
         <div>
-          <p>295 x 413 px</p>
+          <p>{{ photoSize.pxWidth }} x {{ photoSize.pxHeight }} px</p>
           <p>像素大小</p>
         </div>
         <div>
           <p>
-            300 DPI
+            {{ photoSize.dpi }} DPI
           </p>
           <p>分辨率</p>
         </div>
@@ -67,6 +67,7 @@ import Card from '@/components/Card.vue'
 import ColorDot from '@/components/ColorDot.vue'
 import { Component } from "vue-property-decorator";
 import { GeneratePhoto } from '@/api/photo'
+import { photoSizes, PhotoSize } from '@/enums/PhotoSize'
 
 @Component({ components: { Card, ColorDot } })
 export default class PhotoIndex extends Vue {
@@ -78,14 +79,19 @@ export default class PhotoIndex extends Vue {
     hd: false,
     file: ''
   }
-
+  photoSize: PhotoSize = photoSizes[0]
   preview: string = ''
   //图片预览遮罩
   show: boolean = false
   //加载动画
   loading: boolean = false
 
-
+  mounted() {
+    const pages = getCurrentPages()
+    const page = pages[pages.length - 1];
+    const photoSize = photoSizes.find(item => item.id == page.$vm.$mp.query.id)
+    this.photoSize = photoSize ? photoSize : this.photoSize
+  }
   /**
    * 选择图片
    */

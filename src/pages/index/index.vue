@@ -1,29 +1,32 @@
 <template>
 	<view class="content">
 		<div class="banner-box">
-			<u-swiper :list="banners" class="banner"></u-swiper>
+			<u-swiper :list="banners" class="banner" height="500rpx"></u-swiper>
 		</div>
 		<div class="tool-box">
-			<div @click="skipTo" class="size-1-card">
-				<u-image src="https://cdn.icuzz.com/photo/example.jpeg" class="example-image" width="171rpx" height="240rpx"
-					radius="10rpx" />
+			<div @click="navigateToPhotoSelect(3)" class="size-1-card">
+				<u-image src="@/static/example.jpeg" class="example-image" width="171rpx" height="240rpx" radius="10rpx" />
 				<div class="size-1-card-desc">一寸照
-					<div class="hot-tag" />
+					<img src="@/static/hot-tag.png" class="hot-tag shake-tag" />
 				</div>
 			</div>
 			<div class="size-other-box">
-				<div class="size-2-card">二寸照
-					<div class="hot-tag" />
+				<div class="size-2-card" @click="navigateToPhotoSelect(4)">
+					<span>二寸照</span>
+					<img src="@/static/hot-tag.png" class="hot-tag" />
 				</div>
-				<div class="size-2-card">更多尺寸</div>
+				<div class="size-2-card"><span>更多尺寸</span> <img src="@/static/new.png" class="hot-tag" /></div>
 			</div>
 		</div>
 		<div class="selection-title">
 			<p>热门证件</p>
-			<div class="hot-tag" />
+			<img src="@/static/hot-tag.png" class="hot-tag" />
 		</div>
 		<div class="photo-box">
-			<div class="photo-size-list" v-for="(item, index) in data" :key="index">{{ item.name }}</div>
+			<div :class="'photo-size-list' + ' rank' + index" v-for="(item, index) in data" :key="index"
+				@click="navigateToPhotoSelect(item.id)">
+				<span>{{ numberCase(index) }}</span>{{ item.name }}
+			</div>
 		</div>
 	</view>
 </template>
@@ -38,7 +41,7 @@ import { photoSizes } from '@/enums/PhotoSize'
 @Component({ components: { Card } })
 export default class Index extends Vue {
 	banners: Array<string> = [
-		'https://cdn.icuzz.com/photo/banner3.png',
+		'https://cdn.icuzz.com/photo/tiny-banner6.png',
 	]
 	form: AnyObject = {
 		height: 413,
@@ -50,6 +53,11 @@ export default class Index extends Vue {
 	}
 	data = photoSizes
 	preview: string = ''
+
+	numberCase(index: number): string {
+		const num = index + 1
+		return num >= 10 ? num.toString() : '0' + num
+	}
 	/**
 	 * 选择图片
 	 */
@@ -62,11 +70,6 @@ export default class Index extends Vue {
 				// 获取选择的文件路径
 			}
 		});
-	}
-	/**
-	 * 页面加载调用
-	 */
-	mounted() {
 	}
 	/**
 	 * 提交表单
@@ -85,6 +88,11 @@ export default class Index extends Vue {
 	skipTo() {
 		uni.navigateTo({
 			url: '/pages/photo/index'
+		})
+	}
+	navigateToPhotoSelect(id: number) {
+		uni.navigateTo({
+			url: '/pages/photo/index?id=' + id
 		})
 	}
 }
@@ -110,20 +118,25 @@ $card-padding: 30rpx;
 	background-color: #f2f5f6;
 	overflow: hidden;
 
+	.navigation {
+		width: 100%;
+		height: 80rpx;
+		object-fit: cover;
+	}
 
 	.banner-box {
 		width: 100%;
-		height: 300rpx;
+		height: 500rpx;
 	}
 
 	.banner {
 		width: 100% !important;
-		height: 300rpx;
+		height: 500rpx !important;
 	}
 
 	.tool-box {
 		position: relative;
-		top: -80rpx;
+		top: -60rpx;
 		width: calc(100% - (2 * $padding));
 		display: flex;
 		justify-content: space-between;
@@ -171,7 +184,7 @@ $card-padding: 30rpx;
 			display: flex;
 			flex-direction: column;
 			gap: 40rpx;
-			font-size: 0.8rem;
+			font-size: 1rem;
 			font-weight: bold;
 			display: flex;
 			gap: 20rpx;
@@ -181,11 +194,25 @@ $card-padding: 30rpx;
 			width: 100%;
 			height: calc(50% - 10rpx);
 			padding: $card-padding;
+			padding-top: $card-padding + 10rpx;
 			box-sizing: border-box;
 			border-radius: $card-radius;
 			background-color: #fff;
 			display: flex;
 			gap: 20rpx;
+			position: relative;
+
+			span::before {
+				content: "";
+				display: block;
+				height: 8rpx;
+				border-radius: 4rpx;
+				width: 40rpx;
+				background-color: #F56C6C;
+				position: absolute;
+				left: 20rpxrpx;
+				top: 20rpx;
+			}
 		}
 	}
 
@@ -215,9 +242,30 @@ $card-padding: 30rpx;
 
 		.photo-size-list {
 			width: 50%;
-			height: 60rpx;
-			font-size: 24rpx;
+			height: 100rpx;
+			line-height: 100rpx;
+			font-size: 1rem;
 			font-weight: bold;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+
+			span {
+				margin-right: 0.8rem;
+				color: #909399;
+			}
+		}
+
+		.rank0>span {
+			color: red;
+		}
+
+		.rank1>span {
+			color: #e45656;
+		}
+
+		.rank2>span {
+			color: #f9ae3d;
 		}
 	}
 
@@ -226,14 +274,42 @@ $card-padding: 30rpx;
 		height: 20rpx;
 		width: 54rpx;
 		overflow: hidden;
-		background-size: contain;
 		border-radius: 6rpx;
-		background-repeat: no-repeat;
-		background-image: url('https://cdn.icuzz.com/photo/hot-tag.png');
-		background-position: center;
 	}
 
+	.shake-tag {
+		animation: shakeAndPause 1.5s steps(4, end) infinite;
+	}
 
+	/* 定义关键帧动画 */
+	@keyframes shakeAndPause {
 
+		0%,
+		5% {
+			transform: rotate(0deg);
+		}
+
+		5%,
+		10% {
+			transform: rotate(6deg);
+			/* 改变数值可以调整抖动的距离 */
+		}
+
+		10%,
+		15% {
+			transform: rotate(-6deg);
+		}
+
+		15%,
+		20% {
+			transform: rotate(6deg);
+			/* 改变数值可以调整抖动的距离 */
+		}
+
+		20%,
+		100% {
+			transform: rotate(0deg);
+		}
+	}
 }
 </style>
