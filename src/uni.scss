@@ -82,4 +82,16 @@ $uni-font-size-paragraph: 15px;
 page {
   height: 100%;
 }
-$theme-color:#f9ae3d;
+
+div{
+  box-sizing: border-box;
+}
+
+
+// 主题色
+$theme-color:#f9ae3d; // rbg(249,174,61)
+// 透明色
+$theme-color-transparent: rgba(249,174,61,0.2);
+// 默认页面边距
+$page-padding:40rpx;
+

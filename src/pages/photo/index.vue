@@ -130,10 +130,13 @@ export default class PhotoIndex extends Vue {
     this.loading = true
     await GeneratePhoto(this.form).then(res => this.preview = res)
       .catch(err => console.log(err))
-    this.loading = false
     uni.setStorageSync('photo-url', this.preview)
+
     uni.navigateTo({
-      url: '/pages/photo/edit'
+      url: '/pages/photo/edit',
+      success: () => {
+        this.loading = false
+      }
     })
   }
   /**

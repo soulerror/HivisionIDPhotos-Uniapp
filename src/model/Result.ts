@@ -13,5 +13,6 @@ export interface RequestOptions {
   data?: string | AnyObject | any;
   loading?: boolean;
   gateway?: string;
-  headers?: AnyObject
+  headers?: AnyObject;
+  remoteUrl?: string;
 }

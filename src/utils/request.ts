@@ -13,17 +13,20 @@ const timeout = 10000;
 
 const request = <T>(url: string, options: RequestOptions = { method: Method.GET }): Promise<T> => {
   return new Promise<T>((resolve, reject) => {
-    const { method, data, gateway, loading, headers } = options;
+    const { method, data, gateway, loading, headers, remoteUrl } = options;
     const tokenStr = "test"
     const token = tokenStr && tokenStr.length > 0 ? { Authorization: tokenStr } : {};
+    const targetHeader = headers ? headers : header
+    //远端地址 如果没有特殊指明  就用baseUrl
+    const targetUrl = remoteUrl ? remoteUrl : baseUrl
     //加载动画
     loading && uni.showLoading();
     uni.request({
-      url: gateway ? baseUrl + gateway + url : baseUrl + url,
+      url: gateway ? targetUrl + gateway + url : targetUrl + url,
       method,
       data,
       timeout,
-      header: { ...headers, ...token },
+      header: { ...targetHeader, ...token },
       success: ({ data }) => {
         //类型转换
         const { code, data: resData, message } = data as Result<T>;

@@ -11,9 +11,14 @@
       <ColorDot class="color-list-item" v-for="color in colors" :borderColor="color == '#FFFFFF' ? '#DCDFE6' : ''"
         :key="color" :color="color" @click="changeBackgroudColor(color)"></ColorDot>
     </div>
+    <div>
+      <u-switch></u-switch>
+    </div>
     <div class="bottom-box">
-      <u-button type="warning">保存标清照片</u-button>
-      <u-button type="warning">保存高清照片</u-button>
+      <u-button type="warning" :custom-style="{ width: '240rpx', borderRadius: '10rpx' }" :plain="true"
+        color="#f9ae3d">保存标清照片</u-button>
+      <u-button type="warning" :custom-style="{ width: '240rpx', borderRadius: '10rpx' }" :plain="true"
+        color="#f9ae3d">保存高清照片</u-button>
     </div>
   </div>
 </template>
@@ -68,13 +73,21 @@ export default class PhotoEdit extends Vue {
   margin: 0 auto;
 }
 
-.bottom-box {}
+.bottom-box {
+  //减去父元素的padding
+  width: calc(100% - 40rpx);
+  position: absolute;
+  bottom: 100rpx;
+  display: flex;
+  justify-content: space-around;
+}
 
 .color-list {
+  margin-top: 20rpx;
   display: flex;
   align-items: center;
-  gap: 40rpx;
-  height: 100rpx;
+  gap: 30rpx;
+  height: 120rpx;
 
   &-item {
     height: 60rpx;
