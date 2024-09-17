@@ -5,8 +5,8 @@
       <div class="preview-box">
         <u-image :src="form.file" mode="aspectFit" height="1000rpx" radius="10rpx"></u-image>
       </div>
-      <u-button type=" warning" class="bottom-box-btn" :custom-style="{ width: '240rpx', borderRadius: '20rpx' }"
-        :plain="true" color="#f9ae3d" @click="confirmSelect">确认选择</u-button>
+      <u-button color="#F77261" class="bottom-box-btn" :custom-style="{ width: '240rpx', borderRadius: '20rpx' }"
+     @click="confirmSelect">确认选择</u-button>
     </u-overlay>
     <div class="photo-select-box">
       <div class="photo-select-box-title">{{ photoSize.name }}</div>
@@ -41,23 +41,21 @@
         <div>文件大小 <span>KB</span></div>
         <div>文件格式 <span>JPG</span></div>
       </div>
+      <div>拍照建议</div>
       <div class="photo-select-card">
-        <div>拍照建议</div>
         <div>1.放松身体，挺胸抬头，两眼平视前方</div>
         <div>2.去掉发饰、眼镜，露出耳朵</div>
         <div>3.着深色衣服，在白色背景墙前成像效果最佳</div>
-        <div>4.人像尽量保证在照片中间</div>
       </div>
     </div>
     <!-- 照片选择 -->
     <div class="bottom-box">
-      <u-button type="warning" :custom-style="{ width: '240rpx', borderRadius: '20rpx' }" :plain="true" color="#f9ae3d"
-        @click="chooseImage('album')">去相册选择</u-button>
-      <u-button type="warning" :custom-style="{ width: '240rpx', borderRadius: '20rpx' }"
+      <u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '20rpx' }" :plain="true" text="去相册选择" @click="chooseImage('album')"></u-button>
+      <u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '20rpx' }"
         @click="chooseImage('camera')">去拍照</u-button>
     </div>
     <!-- 加载页 -->
-    <u-loading-page :loading="loading"></u-loading-page>
+    <u-loading-page :loading="loading" loading-text="正在生成中..." bg-color="#fff" />
   </view>
 </template>
 
@@ -169,6 +167,7 @@ $page-padding: 20rpx;
   display: flex;
   flex-direction: column;
   padding: 0 40rpx;
+  background-color: #fff;
 
   &-box {
     height: calc(100% - 150rpx);
@@ -218,7 +217,8 @@ $page-padding: 20rpx;
     margin: 20rpx 0 40rpx 0;
     padding: 60rpx 40rpx;
     border-radius: 16rpx;
-    background-color: #EBEEF5;
+    // background-color: #fff;
+    background-color: #F8F8F8;
     color: #909399;
     display: flex;
     flex-direction: column;

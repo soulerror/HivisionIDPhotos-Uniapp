@@ -83,15 +83,17 @@ page {
   height: 100%;
 }
 
-div{
+div {
   box-sizing: border-box;
 }
 
 
 // 主题色
-$theme-color:#f9ae3d; // rbg(249,174,61)
+$theme-color: #f9ae3d; // rbg(249,174,61)
 // 透明色
-$theme-color-transparent: rgba(249,174,61,0.2);
+$theme-color-transparent: rgba(249, 174, 61, 0.2);
 // 默认页面边距
-$page-padding:40rpx;
+$page-padding: 40rpx;
 
+//按钮颜色
+$button-color: #F77261;

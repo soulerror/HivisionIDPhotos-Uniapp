@@ -41,7 +41,7 @@ import { photoSizes } from '@/enums/PhotoSize'
 @Component({ components: { Card } })
 export default class Index extends Vue {
 	banners: Array<string> = [
-		'https://cdn.icuzz.com/photo/tiny-banner6.png',
+		'https://cdn.icuzz.com/photo/tiny-banner.png',
 	]
 	form: AnyObject = {
 		height: 413,
@@ -110,13 +110,13 @@ $card-radius: 20rpx;
 $card-padding: 30rpx;
 
 .content {
-	height: 100%;
 	width: 100%;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	background-color: #f2f5f6;
-	overflow: hidden;
+	// background-color: #f2f5f6;
+	background-color: #F8F8F8;
+	overflow-y: scroll;
 
 	.navigation {
 		width: 100%;
@@ -140,22 +140,6 @@ $card-padding: 30rpx;
 		width: calc(100% - (2 * $padding));
 		display: flex;
 		justify-content: space-between;
-
-		.card-tag {
-			display: block;
-			width: 80rpx;
-			height: 36rpx;
-			line-height: 36rpx;
-			border-radius: 6rpx;
-			font-size: 24rpx;
-			font-weight: normal;
-			color: rgb(245, 108, 108);
-			text-align: center;
-			border: 1px solid rgb(245, 108, 108);
-			background-color: rgba(245, 108, 108, 0.1);
-		}
-
-		//#f4352f
 
 		.size-1-card {
 			height: $card-height;
@@ -207,8 +191,8 @@ $card-padding: 30rpx;
 				display: block;
 				height: 8rpx;
 				border-radius: 4rpx;
-				width: 40rpx;
-				background-color: #F56C6C;
+				width: 2rem;
+				background-color: red;
 				position: absolute;
 				left: 20rpxrpx;
 				top: 20rpx;
