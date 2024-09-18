@@ -14,7 +14,8 @@
     "baseUrl": ".",
     "types": [
       "webpack-env",
-      "@dcloudio/types"
+      "@dcloudio/types",
+      "miniprogram-api-typings"
     ],
     "paths": {
       "@/*": [

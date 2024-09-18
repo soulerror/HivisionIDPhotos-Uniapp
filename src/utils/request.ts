@@ -73,10 +73,8 @@ const request = <T>(url: string, options: RequestOptions = { method: Method.GET 
  * @param options 
  * @returns 
  */
-export const uploadFile = <T>(url: string, options: RequestOptions = { method: Method.GET }): Promise<T> => {
+export const uploadFile = <T>(url: string, name: string, path: string, options: RequestOptions = { method: Method.GET }): Promise<T> => {
   const { data, gateway } = options;
-  const filePath = data['file']
-  delete data['file']
   let formData = {}
   // #ifdef MP-WEIXIN
   formData = JSON.stringify(data)
@@ -87,11 +85,11 @@ export const uploadFile = <T>(url: string, options: RequestOptions = { method: M
   return new Promise<any>((resolve, reject) => {
     uni.uploadFile({
       url: gateway ? baseUrl + gateway + url : baseUrl + url,
-      filePath: filePath,
-      name: 'input_image',
+      filePath: path,
+      name: name,
       formData: formData,
       success: ({ data }) => {
-        resolve('data:image/png;base64,' + JSON.parse(data).image_base64_standard)
+        resolve(JSON.parse(data))
       },
       fail(err) {
         uni.showModal({

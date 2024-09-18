@@ -35,7 +35,6 @@
 import Vue from 'vue';
 import Card from '@/components/Card.vue'
 import { Component } from "vue-property-decorator";
-import { GeneratePhoto } from '@/api/photo'
 import { photoSizes } from '@/enums/PhotoSize'
 
 @Component({ components: { Card } })
@@ -57,25 +56,6 @@ export default class Index extends Vue {
 	numberCase(index: number): string {
 		const num = index + 1
 		return num >= 10 ? num.toString() : '0' + num
-	}
-	/**
-	 * 选择图片
-	 */
-	chooseImage() {
-		uni.chooseImage({
-			count: 1,
-			success: (res) => {
-				this.form.file = res.tempFilePaths[0];
-				console.log(this.form.file);
-				// 获取选择的文件路径
-			}
-		});
-	}
-	/**
-	 * 提交表单
-	 */
-	submit() {
-		GeneratePhoto(this.form).then(res => this.preview = res)
 	}
 	/**
 	 * 选择图片
@@ -194,7 +174,7 @@ $card-padding: 30rpx;
 				width: 2rem;
 				background-color: red;
 				position: absolute;
-				left: 20rpxrpx;
+				left: 20rpx;
 				top: 20rpx;
 			}
 		}

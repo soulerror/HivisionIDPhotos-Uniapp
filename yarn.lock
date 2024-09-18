@@ -7789,6 +7789,11 @@ minipass@^3.1.1:
   dependencies:
     yallist "^4.0.0"
 
+miniprogram-api-typings@^3.12.3:
+  version "3.12.3"
+  resolved "https://registry.npmmirror.com/miniprogram-api-typings/-/miniprogram-api-typings-3.12.3.tgz#b42e45d79f99fe9afabb9c3be6053b5fe081139e"
+  integrity sha512-o7bOfrU28MEMCBWo83nXv0ROQSBFxJcfCl4f2wTYqah64ipC5RGqLJfvWJTWhlQt2ECVwspSzM8LgvnfMo7TEQ==
+
 mississippi@^3.0.0:
   version "3.0.0"
   resolved "https://registry.npmmirror.com/mississippi/-/mississippi-3.0.0.tgz#ea0a3291f97e0b5e8776b363d5f0a12d94c67022"

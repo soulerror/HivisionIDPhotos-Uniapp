@@ -1,9 +1,10 @@
 <template>
   <div class="photo-edit">
-    <div class="preivew-box" :style="{ 'height': imageHeight, 'width': imageWidth, 'background-color': backgroundColor }">
-      <u-image class="photo" :src="orginPhotoUrl" :style="{ 'background-color': backgroundColor }" mode="aspectFit"
+    <div class="preivew-box"
+      :style="{ 'height': imageHeight, 'width': imageWidth, 'background-color': backgroundColor }">
+      <u-image class="photo" :src="transparentBase64" :style="{ 'background-color': backgroundColor }" mode="aspectFit"
         :width="imageWidth" :height="imageHeight" />
-      <!-- <image :src="orginPhotoUrl" class="preview-photo" :style="{ 'background-color': backgroundColor }" /> -->
+      <!-- <image :src="transparentBase64" class="preview-photo" :style="{ 'background-color': backgroundColor }" /> -->
     </div>
     <p>颜色:</p>
     <div class="color-list">
@@ -17,15 +18,17 @@
       <u-switch></u-switch>
     </div>
     <div class="bottom-box">
-      <u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '10rpx' }" :plain="true">保存冲印照片</u-button>
-      <u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '10rpx' }">保存证件照片</u-button>
+      <u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '10rpx' }"
+        :plain="true">保存冲印照片</u-button>
+      <u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '10rpx' }"
+        @click="savePhotoToAlbum">保存证件照片</u-button>
     </div>
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue';
 import { Component } from "vue-property-decorator";
-import { GeneratePhoto } from '@/api/photo'
+import { GeneratePhoto, AddBackgroudColor } from '@/api/photo'
 import Card from '@/components/Card.vue'
 import ColorDot from '@/components/ColorDot.vue'
 import { Colors } from '@/model/Colors'
@@ -37,19 +40,18 @@ export default class PhotoEdit extends Vue {
   colors = { ...Colors }
   form: AnyObject = {
     height: 413,
-    // height: 120,
     width: 295,
-    // width: 80,
     human_matting_model: "hivision_modnet",
     face_detect_model: "mtcnn",
     hd: false,
     file: ''
   }
-
-  backgroundColor: string = '#fff'
-  orginPhotoUrl: string = ''
-  preview: string | undefined = undefined
-
+  //图片背景色
+  backgroundColor: string = '#ffffff'
+  //抠图之后的透明底色的base64照片
+  transparentBase64: string = ''
+  //本地图片的地址
+  transparentBase64Path: string = ''
 
   /**
    * 计算照片高度
@@ -64,6 +66,13 @@ export default class PhotoEdit extends Vue {
     }
   }
 
+  /**
+   * 页面加载时初始化
+   */
+  created() {
+    this.transparentBase64 = uni.getStorageSync("photo:transparentBase64")
+    this.transparentBase64Path = uni.getStorageSync("photo:transparentBase64:path")
+  }
 
   /**
    * 计算照片宽度
@@ -78,23 +87,57 @@ export default class PhotoEdit extends Vue {
       return (standard_width / height * width) + 'rpx';
     }
   }
-
-  created() {
-    this.orginPhotoUrl = uni.getStorageSync("photo-url")
-  }
-  onShow(options: any) {
-
-  }
   /**
-  * 提交表单
-  */
-  submit() {
-    GeneratePhoto(this.form).then(url => this.preview = url)
-  }
+   * 修改图片颜色
+   * @param color 颜色
+   */
   changeBackgroudColor(color: string) {
     this.backgroundColor = color
   }
-
+  /**
+   * 保存图片到相册
+   */
+  async savePhotoToAlbum() {
+    const colorBase64 = await AddBackgroudColor({ color: this.backgroundColor.replace('#', '') }, 'input_image', this.transparentBase64Path).then(res => res['image_base64'])
+    console.log(colorBase64);
+    if (colorBase64 === undefined) {
+      return
+    }
+    //查看用户是否授权保存相册
+    uni.authorize({
+      scope: 'scope.writePhotosAlbum',
+      success() {
+        uni.getImageInfo({
+          src: colorBase64,
+          success(imageInfo) {
+            uni.saveImageToPhotosAlbum({
+              filePath: imageInfo.path,
+              success() {
+                uni.showModal({
+                  title: "保存成功",
+                  showCancel: false,
+                });
+              },
+              fail() {
+                uni.showModal({
+                  title: "保存失败",
+                  content: `保存发生了异常,保存失败了哦~`,
+                  showCancel: false,
+                });
+              }
+            })
+          }
+        })
+      },
+      fail() {
+        uni.showModal({
+          title: "保存失败",
+          content: `用户未授权相册权限,保存失败了哦~`,
+          showCancel: false,
+        });
+      }
+    })
+  }
 }
 </script>
 <style lang="scss" scoped>

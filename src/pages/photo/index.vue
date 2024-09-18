@@ -3,10 +3,10 @@
     <!-- 预览遮罩 -->
     <u-overlay :show="show" @click="show = false">
       <div class="preview-box">
-        <u-image :src="form.file" mode="aspectFit" height="1000rpx" radius="10rpx"></u-image>
+        <u-image :src="imagePath" mode="aspectFit" height="1000rpx" radius="10rpx"></u-image>
       </div>
       <u-button color="#F77261" class="bottom-box-btn" :custom-style="{ width: '240rpx', borderRadius: '20rpx' }"
-     @click="confirmSelect">确认选择</u-button>
+        @click="confirmSelect">确认选择</u-button>
     </u-overlay>
     <div class="photo-select-box">
       <div class="photo-select-box-title">{{ photoSize.name }}</div>
@@ -50,7 +50,8 @@
     </div>
     <!-- 照片选择 -->
     <div class="bottom-box">
-      <u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '20rpx' }" :plain="true" text="去相册选择" @click="chooseImage('album')"></u-button>
+      <u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '20rpx' }" :plain="true" text="去相册选择"
+        @click="chooseImage('album')"></u-button>
       <u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '20rpx' }"
         @click="chooseImage('camera')">去拍照</u-button>
     </div>
@@ -75,10 +76,10 @@ export default class PhotoIndex extends Vue {
     human_matting_model: "hivision_modnet",
     face_detect_model: "mtcnn",
     hd: false,
-    file: ''
   }
+  //本地文件地址
+  imagePath: string = ''
   photoSize: PhotoSize = photoSizes[0]
-  preview: string = ''
   //图片预览遮罩
   show: boolean = false
   //加载动画
@@ -101,7 +102,7 @@ export default class PhotoIndex extends Vue {
       sourceType: [type],
       success: (res) => {
         const path = res.tempFilePaths[0];
-        this.form.file = path
+        this.imagePath = path
         // 获取选择的文件路径
         this.show = true
       }
@@ -115,7 +116,7 @@ export default class PhotoIndex extends Vue {
       sourceType: [type],
       success: (res) => {
         const path = res.tempFiles[0].tempFilePath
-        this.form.file = path
+        this.imagePath = path
         this.show = true
       }
     });
@@ -132,24 +133,37 @@ export default class PhotoIndex extends Vue {
    */
   async confirmSelect() {
     this.loading = true
-    await GeneratePhoto(this.form).then(res => this.preview = res)
+    const prefix = 'data:image/png;base64,'
+    let transparentBase64 = ''
+    let transparentBase64Path = ''
+    //提交后台服务器  获取透明base64
+    await GeneratePhoto(this.form, 'input_image', this.imagePath)
+      .then(data => {
+        //标准版
+        transparentBase64 = data['image_base64_standard']
+        const fs = uni.getFileSystemManager()
+        // #ifdef MP-WEIXIN
+        transparentBase64Path = `${wx.env.USER_DATA_PATH}/temp_image.png`;
+        // #endif
+        fs.writeFile({
+          filePath: transparentBase64Path,
+          data: transparentBase64,
+          encoding: 'base64',
+          success(res) {
+            console.log(res, "写入本地成功");
+          }
+        })
+      })
       .catch(err => console.log(err))
-    uni.setStorageSync('photo-url', this.preview)
-
+    //把处理后的base64存到本地
+    uni.setStorageSync('photo:transparentBase64', prefix + transparentBase64)
+    uni.setStorageSync('photo:transparentBase64:path', transparentBase64Path)
     uni.navigateTo({
       url: '/pages/photo/edit',
       success: () => {
         this.loading = false
       }
     })
-  }
-  /**
-   * 选择图片
-   * @param event 
-   */
-  onSelectFile(event: any) {
-    console.log("file", event.file.url);
-    this.form.file = event.file.url
   }
   skipTo() {
     uni.navigateTo({

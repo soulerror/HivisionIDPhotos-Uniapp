@@ -1,7 +1,7 @@
 <template>
     <div class="mine-page">
         <div class="banner">
-            <u-avatar src="https://cdn.icuzz.com/photo/example.jpeg" mode="aspectFill" size="60" />
+            <u-image src="https://cdn.icuzz.com/photo/example.jpeg" mode="aspectFill" size="60" />
             <p>欢迎使用AI免费证件照</p>
         </div>
         <div class="card card-common">

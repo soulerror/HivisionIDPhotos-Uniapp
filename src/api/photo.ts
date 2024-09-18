@@ -6,8 +6,8 @@ import Method from "@/enums/Method";
  * @param data 表单数据
  * @returns 结果
  */
-export const GeneratePhoto = (data: any): Promise<any> => {
-  return uploadFile('/idphoto', { data, method: Method.POST })
+export const GeneratePhoto = (data: any, name: string, path: string): Promise<any> => {
+  return uploadFile('/idphoto', name, path, { data, method: Method.POST })
 }
 
 
@@ -23,3 +23,11 @@ export const GetPhotoSize = (): Promise<any> => {
   },
   )
 }
+/**
+ * 添加背景色
+ * @returns 
+ */
+export const AddBackgroudColor = (data: any, name: string, path: string): Promise<any> => {
+  return uploadFile('/add_background', name, path, { data, method: Method.POST })
+}
+
