@@ -80,6 +80,7 @@ export const uploadFile = <T>(
   options: RequestOptions = { method: Method.GET }
 ): Promise<T> => {
   const { data: formData, gateway } = options;
+  //JSON化
   let jsonData: any;
   // #ifdef MP-WEIXIN
   jsonData = JSON.stringify(formData);
@@ -87,7 +88,6 @@ export const uploadFile = <T>(
   // #ifdef H5
   jsonData = formData;
   // #endif
-  debugger;
   return new Promise<any>((resolve, reject) => {
     uni.uploadFile({
       url: gateway ? baseUrl + gateway + url : baseUrl + url,

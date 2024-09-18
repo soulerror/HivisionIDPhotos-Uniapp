@@ -13,9 +13,6 @@
         :borderColor="color == '#FFFFFF' ? '#DCDFE6' : ''" :key="color" :color="color"
         @click="changeBackgroudColor(color)"></div>
     </div>
-    <div>
-      <u-switch></u-switch>
-    </div>
     <div class="bottom-box">
       <u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '10rpx' }" :plain="true">保存冲印照片</u-button>
       <u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '10rpx' }"
@@ -26,7 +23,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { Component } from "vue-property-decorator";
-import { GeneratePhoto, AddBackgroudColor } from '@/api/photo'
+import { AddBackgroudColor } from '@/api/photo'
 import Card from '@/components/Card.vue'
 import ColorDot from '@/components/ColorDot.vue'
 import { Colors } from '@/model/Colors'
@@ -127,7 +124,7 @@ export default class PhotoEdit extends Vue {
                     uni.showToast({
                       title: "保存成功",
                       content: `图片已保存成功,快去相册看看吧~`,
-                      duration:5000
+                      duration: 5000
                     });
                   },
                   fail(err) {

@@ -28,7 +28,6 @@ export const GetPhotoSize = (): Promise<any> => {
  * @returns 
  */
 export const AddBackgroudColor = (data: any, name: string, path: string): Promise<any> => {
-  debugger
   return uploadFile('/add_background', name, path, { data, method: Method.POST })
 }
 
