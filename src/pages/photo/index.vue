@@ -147,7 +147,7 @@ export default class PhotoIndex extends Vue {
         // #endif
         fs.writeFile({
           filePath: transparentBase64Path,
-          data: transparentBase64,
+          data: transparentBase64.replace(prefix, ''),
           encoding: 'base64',
           success(res) {
             console.log(res, "写入本地成功");
@@ -156,7 +156,7 @@ export default class PhotoIndex extends Vue {
       })
       .catch(err => console.log(err))
     //把处理后的base64存到本地
-    uni.setStorageSync('photo:transparentBase64', prefix + transparentBase64)
+    uni.setStorageSync('photo:transparentBase64', transparentBase64)
     uni.setStorageSync('photo:transparentBase64:path', transparentBase64Path)
     uni.navigateTo({
       url: '/pages/photo/edit',

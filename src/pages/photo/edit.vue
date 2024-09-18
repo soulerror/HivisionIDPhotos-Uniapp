@@ -1,7 +1,6 @@
 <template>
   <div class="photo-edit">
-    <div class="preivew-box"
-      :style="{ 'height': imageHeight, 'width': imageWidth, 'background-color': backgroundColor }">
+    <div class="preivew-box" :style="{ 'height': imageHeight, 'width': imageWidth, 'background-color': backgroundColor }">
       <u-image class="photo" :src="transparentBase64" :style="{ 'background-color': backgroundColor }" mode="aspectFit"
         :width="imageWidth" :height="imageHeight" />
       <!-- <image :src="transparentBase64" class="preview-photo" :style="{ 'background-color': backgroundColor }" /> -->
@@ -18,8 +17,7 @@
       <u-switch></u-switch>
     </div>
     <div class="bottom-box">
-      <u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '10rpx' }"
-        :plain="true">保存冲印照片</u-button>
+      <u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '10rpx' }" :plain="true">保存冲印照片</u-button>
       <u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '10rpx' }"
         @click="savePhotoToAlbum">保存证件照片</u-button>
     </div>
@@ -47,7 +45,7 @@ export default class PhotoEdit extends Vue {
     file: ''
   }
   //图片背景色
-  backgroundColor: string = '#ffffff'
+  backgroundColor: string = ''
   //抠图之后的透明底色的base64照片
   transparentBase64: string = ''
   //本地图片的地址
@@ -98,36 +96,73 @@ export default class PhotoEdit extends Vue {
    * 保存图片到相册
    */
   async savePhotoToAlbum() {
-    const colorBase64 = await AddBackgroudColor({ color: this.backgroundColor.replace('#', '') }, 'input_image', this.transparentBase64Path).then(res => res['image_base64'])
-    console.log(colorBase64);
-    if (colorBase64 === undefined) {
-      return
-    }
+
+    const { backgroundColor, transparentBase64Path } = this
+    const prefix = 'data:image/png;base64,'
     //查看用户是否授权保存相册
     uni.authorize({
       scope: 'scope.writePhotosAlbum',
       success() {
-        uni.getImageInfo({
-          src: colorBase64,
-          success(imageInfo) {
-            uni.saveImageToPhotosAlbum({
-              filePath: imageInfo.path,
+        uni.showLoading({
+          title: '加载中'
+        });
+        AddBackgroudColor({ color: backgroundColor.replace('#', '') }, 'input_image', transparentBase64Path)
+          .then((res) => {
+            const colorBase64 = res['image_base64']
+            if (colorBase64 === undefined) {
+              return
+            }
+            const saveData = colorBase64.replace(prefix, '')
+            console.log(saveData)
+            const tempPath = `${wx.env.USER_DATA_PATH}/temp_color_image.png`;
+            const fs = uni.getFileSystemManager()
+            fs.writeFile({
+              filePath: tempPath,
+              data: saveData,
+              encoding: 'base64',
               success() {
-                uni.showModal({
-                  title: "保存成功",
-                  showCancel: false,
-                });
-              },
-              fail() {
+                uni.saveImageToPhotosAlbum({
+                  filePath: tempPath,
+                  success() {
+                    uni.showToast({
+                      title: "保存成功",
+                      content: `图片已保存成功,快去相册看看吧~`,
+                      duration:5000
+                    });
+                  },
+                  fail(err) {
+                    const { errMsg } = err
+                    if (errMsg === 'saveImageToPhotosAlbum:fail cancel') {
+                      uni.showToast({
+                        title: "保存失败",
+                        content: `您取消了保存到相册哦~`
+                      });
+                    }
+                    else {
+                      console.error("保存文件时发生异常", err);
+                      uni.showModal({
+                        title: "保存失败",
+                        content: `保存发生了异常,保存失败了哦~`
+                      });
+                    }
+                  }
+                })
+              }, fail(err) {
+                console.error("暂存文件到本地发生异常", err);
                 uni.showModal({
                   title: "保存失败",
-                  content: `保存发生了异常,保存失败了哦~`,
-                  showCancel: false,
+                  content: `保存发生了异常,保存失败了哦~`
                 });
               }
             })
-          }
-        })
+          }).catch((err) => {
+            console.error("获取带背景色图片网络请求异常", err);
+            uni.showModal({
+              title: "保存失败",
+              content: `保存发生了异常,保存失败了哦~`,
+              showCancel: false,
+            });
+          })
       },
       fail() {
         uni.showModal({
@@ -135,6 +170,9 @@ export default class PhotoEdit extends Vue {
           content: `用户未授权相册权限,保存失败了哦~`,
           showCancel: false,
         });
+      },
+      complete() {
+        uni.hideLoading()
       }
     })
   }

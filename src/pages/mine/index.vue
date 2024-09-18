@@ -1,8 +1,8 @@
 <template>
     <div class="mine-page">
         <div class="banner">
-            <u-image src="https://cdn.icuzz.com/photo/example.jpeg" mode="aspectFill" size="60" />
-            <p>欢迎使用AI免费证件照</p>
+            <image src="https://cdn.icuzz.com/photo/example.jpeg" class="avatar" mode="aspectFill" size="60rpx" />
+            <p>欢迎使用最美AI证件照</p>
         </div>
         <div class="card card-common">
             <p>正在拼命开发中...</p>
@@ -35,21 +35,24 @@ export default class Index extends Vue {
     .banner {
         height: 400rpx;
         padding: 0 60rpx;
-        padding-top: 200rpx;
+        padding-top: 60rpx;
         background-color: #f9ebe7;
         background-image: linear-gradient(#F77261, #f9ebe7);
-        // background-image: url("https://cdn.icuzz.com/photo/mine-banner.png");
-        // background-size: cover;
-        // background-position: center;
-        // background-repeat: no-repeat;
         display: flex;
         line-height: 100rpx;
+        align-items: center;
         gap: 40rpx;
         border-radius: 0 0 20rpx 20rpx;
 
         &>p:first-of-type {
             font-size: 32rpx;
             font-weight: bold;
+        }
+
+        .avatar{
+            height: 140rpx;
+            width: 140rpx;
+            border-radius: 50%;
         }
     }
 
