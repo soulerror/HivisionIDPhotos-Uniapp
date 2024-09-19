@@ -1,10 +1,16 @@
 import Vue from 'vue'
 import App from './App.vue'
-import './uni.promisify.adaptor'
+import store from './store'
 import uView from 'uview-ui'
+import './uni.promisify.adaptor'
+
 
 
 Vue.config.productionTip = false
 Vue.use(uView)
-const app = new (typeof App === 'function' ? App : Vue.extend(Object.assign({ mpType: 'app' }, App)))
+const app = new Vue({
+  store,
+  render: h => h(App)
+})
 app.$mount();
+

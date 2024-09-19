@@ -93,7 +93,7 @@ export const uploadFile = <T>(
       url: gateway ? baseUrl + gateway + url : baseUrl + url,
       filePath: path,
       name: name,
-      formData: jsonData,
+      formData: formData,
       success: ({ data }) => {
         resolve(JSON.parse(data));
       },

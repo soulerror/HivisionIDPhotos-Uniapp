@@ -35,7 +35,8 @@
 import Vue from 'vue';
 import Card from '@/components/Card.vue'
 import { Component } from "vue-property-decorator";
-import { photoSizes } from '@/enums/PhotoSize'
+import { photoSizes, PhotoSize, getPhotoSize } from '@/model/PhotoSize'
+import { Mutation } from 'vuex-class';
 
 @Component({ components: { Card } })
 export default class Index extends Vue {
@@ -53,27 +54,29 @@ export default class Index extends Vue {
 	data = photoSizes
 	preview: string = ''
 
+	//设置vuex
+	@Mutation('SET_PHOTO_SIZE') setPhotoSize!: (data: PhotoSize) => void
+
+	//数字转换
 	numberCase(index: number): string {
 		const num = index + 1
 		return num >= 10 ? num.toString() : '0' + num
 	}
 	/**
-	 * 选择图片
-	 * @param event 
+	 * 跳转到图片选择页
+	 * @param id 图片大小配置的id
 	 */
-	onSelectFile(event: any) {
-		console.log("file", event.file.url);
-		this.form.file = event.file.url
-	}
-	skipTo() {
-		uni.navigateTo({
-			url: '/pages/photo/index'
-		})
-	}
 	navigateToPhotoSelect(id: number) {
-		uni.navigateTo({
-			url: '/pages/photo/index?id=' + id
-		})
+		const { setPhotoSize, data } = this
+		const photoSize = getPhotoSize(id)
+		if (photoSize) {
+			uni.navigateTo({
+				url: '/pages/photo/index?id=' + id,
+				success() {
+					setPhotoSize(photoSize)
+				}
+			})
+		}
 	}
 }
 </script>

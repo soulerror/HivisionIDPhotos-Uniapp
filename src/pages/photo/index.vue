@@ -66,30 +66,27 @@ import Card from '@/components/Card.vue'
 import ColorDot from '@/components/ColorDot.vue'
 import { Component } from "vue-property-decorator";
 import { GeneratePhoto } from '@/api/photo'
-import { photoSizes, PhotoSize } from '@/enums/PhotoSize'
+import { PhotoSize } from '@/model/PhotoSize'
+import { Getter } from 'vuex-class';
 
 @Component({ components: { Card, ColorDot } })
 export default class PhotoIndex extends Vue {
   form: AnyObject = {
     height: 413,
-    width: 295,
+    width: 800,
     human_matting_model: "hivision_modnet",
-    face_detect_model: "mtcnn",
-    hd: false,
+    face_detect_model: "mtcnn"
   }
   //本地文件地址
   imagePath: string = ''
-  photoSize: PhotoSize = photoSizes[0]
   //图片预览遮罩
   show: boolean = false
   //加载动画
   loading: boolean = false
 
+  @Getter('photoConfig') photoSize!: PhotoSize
+
   mounted() {
-    const pages = getCurrentPages()
-    const page = pages[pages.length - 1];
-    const photoSize = photoSizes.find(item => item.id == page.$vm.$mp.query.id)
-    this.photoSize = photoSize ? photoSize : this.photoSize
   }
   /**
    * 选择图片
@@ -135,16 +132,24 @@ export default class PhotoIndex extends Vue {
     this.loading = true
     const prefix = 'data:image/png;base64,'
     let transparentBase64 = ''
+    let transparentBase64HD = ''
     let transparentBase64Path = ''
+    let transparentBase64HDPath = ''
+    //使用vuex中的尺寸
+    this.form.height = this.photoSize.pxHeight
+    this.form.width = this.photoSize.pxWidth
     //提交后台服务器  获取透明base64
     await GeneratePhoto(this.form, 'input_image', this.imagePath)
       .then(data => {
         //标准版
         transparentBase64 = data['image_base64_standard']
+        transparentBase64HD = data['image_base64_hd']
         const fs = uni.getFileSystemManager()
         // #ifdef MP-WEIXIN
         transparentBase64Path = `${wx.env.USER_DATA_PATH}/temp_image.png`;
+        transparentBase64HDPath = `${wx.env.USER_DATA_PATH}/temp_image_hd.png`;
         // #endif
+        //保存标清照
         fs.writeFile({
           filePath: transparentBase64Path,
           data: transparentBase64.replace(prefix, ''),
@@ -153,11 +158,26 @@ export default class PhotoIndex extends Vue {
             console.log(res, "写入本地成功");
           }
         })
+        //保存高清照
+        fs.writeFile({
+          filePath: transparentBase64HDPath,
+          data: transparentBase64HD.replace(prefix, ''),
+          encoding: 'base64',
+          success(res) {
+            console.log(res, "写入本地成功");
+          }
+        })
       })
       .catch(err => console.log(err))
     //把处理后的base64存到本地
-    uni.setStorageSync('photo:transparentBase64', transparentBase64)
-    uni.setStorageSync('photo:transparentBase64:path', transparentBase64Path)
+    const Photo = {
+      base64: transparentBase64,
+      base64HD: transparentBase64HD,
+      base64Path: transparentBase64Path,
+      base64HDPath: transparentBase64HDPath
+    }
+    //保存到本地
+    uni.setStorageSync('photo:transparent', Photo)
     uni.navigateTo({
       url: '/pages/photo/edit',
       success: () => {

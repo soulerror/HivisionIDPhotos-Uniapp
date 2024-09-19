@@ -1,72 +1,84 @@
 <template>
   <div class="photo-edit">
-    <div class="preivew-box" :style="{ 'height': imageHeight, 'width': imageWidth, 'background-color': backgroundColor }">
-      <u-image class="photo" :src="transparentBase64" :style="{ 'background-color': backgroundColor }" mode="aspectFit"
-        :width="imageWidth" :height="imageHeight" />
-      <!-- <image :src="transparentBase64" class="preview-photo" :style="{ 'background-color': backgroundColor }" /> -->
+    <div class="preview-box">
+      <div class="photo-box"
+        :style="{ 'height': imageHeight, 'width': imageWidth, 'background-color': IDPhotoForm.color }">
+        <u-image class="photo" :src="isHd ? photo.transparentBase64HD : photo.transparentBase64" mode="aspectFit"
+          :width="imageWidth" :height="imageHeight" />
+      </div>
     </div>
-    <p>颜色:</p>
-    <div class="color-list">
-      <ColorDot class="color-list-item" borderColor="#DCDFE6" @click="changeBackgroudColor('')"> <u-icon name="close"
-          size="40rpx" /></ColorDot>
-      <div class="color-list-item" v-for="color in colors" :style="{ 'backgroundColor': color }"
-        :borderColor="color == '#FFFFFF' ? '#DCDFE6' : ''" :key="color" :color="color"
-        @click="changeBackgroudColor(color)"></div>
+    <br />
+    <div class="selection-card">
+      <p>颜色</p>
+      <div class="color-list">
+        <div class="color-list-item" borderColor="#DCDFE6" @click="changeBackgroudColor('')"> <u-icon name="close"
+            size="40rpx" /></div>
+        <div class="color-list-item" v-for="color in colors" :style="{ 'backgroundColor': color }"
+          :borderColor="color == '#FFFFFF' ? '#DCDFE6' : ''" :key="color" :color="color"
+          @click="changeBackgroudColor(color)"></div>
+      </div>
+    </div>
+    <div class="selection-card selection-gap">
+      <p>是否高清</p>
+      <u-switch v-model="isHd" activeColor="#F77261"></u-switch>
     </div>
     <div class="bottom-box">
-      <u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '10rpx' }" :plain="true">保存冲印照片</u-button>
+      <u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '10rpx' }" :plain="true"
+        @click="saveLayoutPhotoToAlbum">保存冲印照片</u-button>
       <u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '10rpx' }"
-        @click="savePhotoToAlbum">保存证件照片</u-button>
+        @click="saveIDPhotoToAlbum">保存证件照片</u-button>
     </div>
+
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue';
 import { Component } from "vue-property-decorator";
-import { AddBackgroudColor } from '@/api/photo'
-import Card from '@/components/Card.vue'
+import { AddBackgroudColor, GenerateLayoutPhoto } from '@/api/photo'
+import LengthLine from '@/components/LengthLine.vue'
 import ColorDot from '@/components/ColorDot.vue'
 import { Colors } from '@/model/Colors'
+import { Getter } from 'vuex-class';
+import { PhotoSize } from '@/model/PhotoSize';
+import { cloneDeep } from 'lodash'
+
 //标准宽度
 const standard_width = 600;
+//图片前缀
+const prefix = 'data:image/png;base64,'
 
-@Component({ components: { Card, ColorDot } })
+@Component({ components: { LengthLine, ColorDot } })
 export default class PhotoEdit extends Vue {
   colors = { ...Colors }
-  form: AnyObject = {
-    height: 413,
-    width: 295,
-    human_matting_model: "hivision_modnet",
-    face_detect_model: "mtcnn",
-    hd: false,
-    file: ''
+  //换底证件照参数
+  IDPhotoForm: AnyObject = {
+    color: '',
+    kb: undefined,
+    render: 0
   }
   //图片背景色
   backgroundColor: string = ''
-  //抠图之后的透明底色的base64照片
-  transparentBase64: string = ''
-  //本地图片的地址
-  transparentBase64Path: string = ''
-
+  //是否高清
+  isHd: boolean = false
+  //照片设置
+  photo: AnyObject = {}
+  //证件照文件临时地址
+  idPhotoTempPath: string = ''
+  //排版照文件临时地址
+  layoutPhotoTempPath: string = ''
+  //vuex中的图片大小信息
+  @Getter('photoConfig') photoSize!: PhotoSize
   /**
    * 计算照片高度
    */
   get imageHeight() {
-    const { height, width } = this.form
-    if (height > width) {
+    const { pxHeight, pxWidth } = this.photoSize
+    if (pxHeight > pxWidth) {
       return standard_width + 'rpx'
     }
     else {
-      return (standard_width / width * height) + 'rpx';
+      return (standard_width / pxWidth * pxHeight) + 'rpx';
     }
-  }
-
-  /**
-   * 页面加载时初始化
-   */
-  created() {
-    this.transparentBase64 = uni.getStorageSync("photo:transparentBase64")
-    this.transparentBase64Path = uni.getStorageSync("photo:transparentBase64:path")
   }
 
   /**
@@ -74,92 +86,204 @@ export default class PhotoEdit extends Vue {
    * 最宽500px
    */
   get imageWidth() {
-    const { width, height } = this.form
-    if (width > height) {
+    const { pxHeight, pxWidth } = this.photoSize
+    if (pxWidth > pxHeight) {
       return standard_width + 'rpx'
     }
     else {
-      return (standard_width / height * width) + 'rpx';
+      return (standard_width / pxHeight * pxWidth) + 'rpx';
     }
   }
+  /**
+   * 页面加载时初始化
+   */
+  created() {
+    this.photo = uni.getStorageSync('photo:transparent')
+  }
+
   /**
    * 修改图片颜色
    * @param color 颜色
    */
   changeBackgroudColor(color: string) {
-    this.backgroundColor = color
+    this.IDPhotoForm.color = color
   }
+
+  /**
+   * 保存六寸排版照到相册
+   */
+  async saveLayoutPhotoToAlbum() {
+    const { layoutPhotoTempPath } = this
+    await this.generateLayoutPhoto()
+    // #ifndef MP-WEXIN
+    uni.authorize({
+      scope: 'scope.writePhotosAlbum',
+      success() {
+        uni.saveImageToPhotosAlbum({
+          filePath: layoutPhotoTempPath,
+          success() {
+            uni.showToast({
+              title: "保存成功",
+              content: `图片已保存成功,快去相册看看吧~`,
+              duration: 5000
+            });
+          },
+          fail(err) {
+            const { errMsg } = err
+            if (errMsg === 'saveImageToPhotosAlbum:fail cancel') {
+              uni.showToast({
+                title: "保存失败",
+                content: `您取消了保存到相册哦~`
+              });
+            }
+            else {
+              console.error("保存文件时发生异常", err);
+              uni.showModal({
+                title: "保存失败",
+                content: `保存发生了异常,保存失败了哦~`
+              });
+            }
+          }
+        })
+      }
+    })
+  }
+
+  /**
+ * 生成六寸排版照
+ */
+  async generateLayoutPhoto() {
+    //先生成带底色证件照
+    await this.generateIDPhoto()
+    const that = this
+    const { photoSize, IDPhotoForm, idPhotoTempPath } = this
+    const form = {
+      height: photoSize.pxHeight,
+      with: photoSize.pxWidth,
+      kb: IDPhotoForm.kb
+    }
+    //请求生成排版照
+    await GenerateLayoutPhoto(form, 'input_image', idPhotoTempPath)
+      .then((res) => {
+        const layoutBase64 = res['image_base64']
+        if (layoutBase64 === undefined) {
+          return
+        }
+        const saveData = layoutBase64.replace(prefix, '')
+        //临时文件地址
+        const tempPath = `${wx.env.USER_DATA_PATH}/image${Date.now()}.png`;
+        const fs = uni.getFileSystemManager()
+        fs.writeFile({
+          filePath: tempPath,
+          data: saveData,
+          encoding: 'base64',
+          success() {
+            that.layoutPhotoTempPath = tempPath
+          }, fail(err) {
+            console.error("暂存文件到本地发生异常", err);
+            uni.showModal({
+              title: "保存失败",
+              content: `保存发生了异常,保存失败了哦~`
+            });
+          }
+        })
+      }).catch((err) => {
+        console.error("获取带背景色图片网络请求异常", err);
+        uni.showModal({
+          title: "保存失败",
+          content: `保存发生了异常,保存失败了哦~`,
+          showCancel: false,
+        });
+      })
+  }
+
+  /**
+   * 生成换底证件照
+   */
+  async generateIDPhoto() {
+    const { photo, IDPhotoForm, isHd } = this
+    const that = this
+    //拷贝一下
+    const form = cloneDeep(IDPhotoForm)
+    //去掉颜色的前缀
+    form.color = form.color.repalce('#', '')
+    await AddBackgroudColor(IDPhotoForm, 'input_image', isHd ? photo.transparentBase64HDPath : photo.transparentBase64Path)
+      .then((res) => {
+        const colorBase64 = res['image_base64']
+        if (colorBase64 === undefined) {
+          return
+        }
+        const saveData = colorBase64.replace(prefix, '')
+        //临时文件地址
+        const tempPath = `${wx.env.USER_DATA_PATH}/image${Date.now()}.png`;
+        const fs = uni.getFileSystemManager()
+        fs.writeFile({
+          filePath: tempPath,
+          data: saveData,
+          encoding: 'base64',
+          success() {
+            that.idPhotoTempPath = tempPath
+          }, fail(err) {
+            console.error("暂存文件到本地发生异常", err);
+            uni.showModal({
+              title: "保存失败",
+              content: `保存发生了异常,保存失败了哦~`
+            });
+          }
+        })
+      }).catch((err) => {
+        console.error("获取带背景色图片网络请求异常", err);
+        uni.showModal({
+          title: "保存失败",
+          content: `保存发生了异常,保存失败了哦~`,
+          showCancel: false,
+        });
+      })
+  }
+
   /**
    * 保存图片到相册
    */
-  async savePhotoToAlbum() {
-
-    const { backgroundColor, transparentBase64Path } = this
-    const prefix = 'data:image/png;base64,'
+  async saveIDPhotoToAlbum() {
+    const { idPhotoTempPath } = this
+    await this.generateIDPhoto()
     //查看用户是否授权保存相册
+    // #ifndef MP-WEXIN
     uni.authorize({
       scope: 'scope.writePhotosAlbum',
       success() {
         uni.showLoading({
           title: '加载中'
         });
-        AddBackgroudColor({ color: backgroundColor.replace('#', '') }, 'input_image', transparentBase64Path)
-          .then((res) => {
-            const colorBase64 = res['image_base64']
-            if (colorBase64 === undefined) {
-              return
-            }
-            const saveData = colorBase64.replace(prefix, '')
-            console.log(saveData)
-            const tempPath = `${wx.env.USER_DATA_PATH}/temp_color_image.png`;
-            const fs = uni.getFileSystemManager()
-            fs.writeFile({
-              filePath: tempPath,
-              data: saveData,
-              encoding: 'base64',
-              success() {
-                uni.saveImageToPhotosAlbum({
-                  filePath: tempPath,
-                  success() {
-                    uni.showToast({
-                      title: "保存成功",
-                      content: `图片已保存成功,快去相册看看吧~`,
-                      duration: 5000
-                    });
-                  },
-                  fail(err) {
-                    const { errMsg } = err
-                    if (errMsg === 'saveImageToPhotosAlbum:fail cancel') {
-                      uni.showToast({
-                        title: "保存失败",
-                        content: `您取消了保存到相册哦~`
-                      });
-                    }
-                    else {
-                      console.error("保存文件时发生异常", err);
-                      uni.showModal({
-                        title: "保存失败",
-                        content: `保存发生了异常,保存失败了哦~`
-                      });
-                    }
-                  }
-                })
-              }, fail(err) {
-                console.error("暂存文件到本地发生异常", err);
-                uni.showModal({
-                  title: "保存失败",
-                  content: `保存发生了异常,保存失败了哦~`
-                });
-              }
-            })
-          }).catch((err) => {
-            console.error("获取带背景色图片网络请求异常", err);
-            uni.showModal({
-              title: "保存失败",
-              content: `保存发生了异常,保存失败了哦~`,
-              showCancel: false,
+        // #endif
+        //保存临时文件到相册
+        uni.saveImageToPhotosAlbum({
+          filePath: idPhotoTempPath,
+          success() {
+            uni.showToast({
+              title: "保存成功",
+              content: `图片已保存成功,快去相册看看吧~`,
+              duration: 5000
             });
-          })
+          },
+          fail(err) {
+            const { errMsg } = err
+            if (errMsg === 'saveImageToPhotosAlbum:fail cancel') {
+              uni.showToast({
+                title: "保存失败",
+                content: `您取消了保存到相册哦~`
+              });
+            }
+            else {
+              console.error("保存文件时发生异常", err);
+              uni.showModal({
+                title: "保存失败",
+                content: `保存发生了异常,保存失败了哦~`
+              });
+            }
+          }
+        })
+        // #ifndef MP-WEXIN
       },
       fail() {
         uni.showModal({
@@ -172,6 +296,7 @@ export default class PhotoEdit extends Vue {
         uni.hideLoading()
       }
     })
+    // #endif
   }
 }
 </script>
@@ -181,17 +306,37 @@ export default class PhotoEdit extends Vue {
   padding: 0 40rpx;
 }
 
-.preivew-box {
-  display: flex;
-  justify-content: center;
-  margin: 0 auto;
+.selection-card {
+  padding: 20rpx 0;
 
-  .preview-photo {
-    width: 750rpx;
-    height: auto;
-    border: 1px solid #DCDFE6;
+}
+
+.selection-gap {
+  p {
+    margin-bottom: 30rpx;
   }
 }
+
+.preview-box {
+  height: 700rpx;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+
+  .photo-box {
+    display: flex;
+    justify-content: center;
+
+    .preview-photo {
+      width: 750rpx;
+      height: auto;
+      border: 1px solid #DCDFE6;
+    }
+  }
+}
+
 
 .bottom-box {
   //减去父元素的padding
@@ -203,9 +348,9 @@ export default class PhotoEdit extends Vue {
 }
 
 .color-list {
-  margin-top: 20rpx;
   display: flex;
   align-items: center;
+  line-height: 120rpx;
   gap: 30rpx;
   height: 120rpx;
 
@@ -214,6 +359,9 @@ export default class PhotoEdit extends Vue {
     width: 60rpx;
     border: 1px solid #DCDFE6;
     border-radius: 8rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   &-item:hover {

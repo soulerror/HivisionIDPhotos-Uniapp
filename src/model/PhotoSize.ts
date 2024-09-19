@@ -101,3 +101,12 @@ export const photoSizes: Array<PhotoSize> = [
     mmHeight: 53,
   },
 ];
+
+/**
+ * 通过配置id获取配置
+ * @param id 配置的id
+ * @returns 配置
+ */
+export const getPhotoSize = (id: number) => {
+  return photoSizes.find(item => item.id === id)
+}
