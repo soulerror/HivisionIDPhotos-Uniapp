@@ -15,7 +15,7 @@
 					<span>二寸照</span>
 					<img src="@/static/hot-tag.png" class="hot-tag" />
 				</div>
-				<div class="size-2-card"><span>更多尺寸</span> <img src="@/static/new.png" class="hot-tag" /></div>
+				<div class="size-2-card"><span>自定义尺寸</span> <img src="@/static/new.png" class="hot-tag" /></div>
 			</div>
 		</div>
 		<div class="selection-title">
@@ -28,6 +28,19 @@
 				<span>{{ numberCase(index) }}</span>{{ item.name }}
 			</div>
 		</div>
+		<!-- 底部自定义尺寸弹窗 -->
+		<u-popup :show="customSize" @close="close" @open="open">
+			<view class="size-form-box">
+				<u-form>
+					<u-form-item label="高度">
+						<u-input type="number" placeholder="请输入内容" border="surround"></u-input>
+					</u-form-item>
+					<u-form-item label="宽度">
+						<u-input type="number" placeholder="请输入内容" border="surround"></u-input>
+					</u-form-item>
+				</u-form>
+			</view>
+		</u-popup>
 	</view>
 </template>
 
@@ -53,6 +66,7 @@ export default class Index extends Vue {
 	}
 	data = photoSizes
 	preview: string = ''
+	// customSize: boolean = true
 
 	//设置vuex
 	@Mutation('SET_PHOTO_SIZE') setPhotoSize!: (data: PhotoSize) => void
@@ -234,6 +248,11 @@ $card-padding: 30rpx;
 		.rank2>span {
 			color: #f9ae3d;
 		}
+	}
+
+	.size-form-box {
+		padding: 40rpx 60rpx;
+		padding-bottom: 0;
 	}
 
 	// 热门图标

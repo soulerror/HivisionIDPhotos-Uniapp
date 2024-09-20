@@ -5,9 +5,11 @@ interface EnvironmentConfig {
 const baseApi: { [key: string]: EnvironmentConfig } = {
   // 开发版
   development: {
-    // host: "http://10.0.12.108:8080",
+    host: "http://10.0.12.108:8080",
     // host: "http://localhost:8080",
-    host: "https://photo.icuzz.com"
+    // host: "https://photo.icuzz.com"
+    //蚊子服务器
+    // host: "http://121.62.63.137:8199"
   },
   // 体验版
   trial: {

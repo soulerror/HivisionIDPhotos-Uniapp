@@ -3,8 +3,8 @@
     <div class="preview-box">
       <div class="photo-box"
         :style="{ 'height': imageHeight, 'width': imageWidth, 'background-color': IDPhotoForm.color }">
-        <u-image class="photo" :src="isHd ? photo.transparentBase64HD : photo.transparentBase64" mode="aspectFit"
-          :width="imageWidth" :height="imageHeight" />
+        <u-image class="photo" :src="isHd ? photo.base64HD : photo.base64" mode="aspectFit" :width="imageWidth"
+          :height="imageHeight" />
       </div>
     </div>
     <br />
@@ -26,7 +26,7 @@
       <u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '10rpx' }" :plain="true"
         @click="saveLayoutPhotoToAlbum">保存冲印照片</u-button>
       <u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '10rpx' }"
-        @click="saveIDPhotoToAlbum">保存证件照片</u-button>
+        @click="generateIDPhoto">保存证件照片</u-button>
     </div>
 
   </div>
@@ -110,46 +110,6 @@ export default class PhotoEdit extends Vue {
   }
 
   /**
-   * 保存六寸排版照到相册
-   */
-  async saveLayoutPhotoToAlbum() {
-    const { layoutPhotoTempPath } = this
-    await this.generateLayoutPhoto()
-    // #ifndef MP-WEXIN
-    uni.authorize({
-      scope: 'scope.writePhotosAlbum',
-      success() {
-        uni.saveImageToPhotosAlbum({
-          filePath: layoutPhotoTempPath,
-          success() {
-            uni.showToast({
-              title: "保存成功",
-              content: `图片已保存成功,快去相册看看吧~`,
-              duration: 5000
-            });
-          },
-          fail(err) {
-            const { errMsg } = err
-            if (errMsg === 'saveImageToPhotosAlbum:fail cancel') {
-              uni.showToast({
-                title: "保存失败",
-                content: `您取消了保存到相册哦~`
-              });
-            }
-            else {
-              console.error("保存文件时发生异常", err);
-              uni.showModal({
-                title: "保存失败",
-                content: `保存发生了异常,保存失败了哦~`
-              });
-            }
-          }
-        })
-      }
-    })
-  }
-
-  /**
  * 生成六寸排版照
  */
   async generateLayoutPhoto() {
@@ -178,7 +138,7 @@ export default class PhotoEdit extends Vue {
           data: saveData,
           encoding: 'base64',
           success() {
-            that.layoutPhotoTempPath = tempPath
+            that.savePhotoToAlbum(tempPath)
           }, fail(err) {
             console.error("暂存文件到本地发生异常", err);
             uni.showModal({
@@ -203,11 +163,14 @@ export default class PhotoEdit extends Vue {
   async generateIDPhoto() {
     const { photo, IDPhotoForm, isHd } = this
     const that = this
+    if (IDPhotoForm.kb === undefined) {
+      delete IDPhotoForm.kb
+    }
     //拷贝一下
     const form = cloneDeep(IDPhotoForm)
     //去掉颜色的前缀
-    form.color = form.color.repalce('#', '')
-    await AddBackgroudColor(IDPhotoForm, 'input_image', isHd ? photo.transparentBase64HDPath : photo.transparentBase64Path)
+    form.color = form.color.replace('#', '')
+    await AddBackgroudColor(IDPhotoForm, 'input_image', isHd ? photo.base64Path : photo.base64HDPath)
       .then((res) => {
         const colorBase64 = res['image_base64']
         if (colorBase64 === undefined) {
@@ -215,14 +178,14 @@ export default class PhotoEdit extends Vue {
         }
         const saveData = colorBase64.replace(prefix, '')
         //临时文件地址
-        const tempPath = `${wx.env.USER_DATA_PATH}/image${Date.now()}.png`;
+        const tempPath = `${wx.env.USER_DATA_PATH}/${Date.now()}.png`;
         const fs = uni.getFileSystemManager()
         fs.writeFile({
           filePath: tempPath,
           data: saveData,
           encoding: 'base64',
           success() {
-            that.idPhotoTempPath = tempPath
+            that.savePhotoToAlbum(tempPath)
           }, fail(err) {
             console.error("暂存文件到本地发生异常", err);
             uni.showModal({
@@ -244,9 +207,9 @@ export default class PhotoEdit extends Vue {
   /**
    * 保存图片到相册
    */
-  async saveIDPhotoToAlbum() {
-    const { idPhotoTempPath } = this
-    await this.generateIDPhoto()
+  async savePhotoToAlbum(tempPath: string) {
+    console.log(tempPath, "tempPath");
+
     //查看用户是否授权保存相册
     // #ifndef MP-WEXIN
     uni.authorize({
@@ -258,7 +221,7 @@ export default class PhotoEdit extends Vue {
         // #endif
         //保存临时文件到相册
         uni.saveImageToPhotosAlbum({
-          filePath: idPhotoTempPath,
+          filePath: tempPath,
           success() {
             uni.showToast({
               title: "保存成功",
