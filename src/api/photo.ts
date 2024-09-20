@@ -31,3 +31,11 @@ export const AddBackgroudColor = (data: any, name: string, path: string): Promis
   return uploadFile('/add_background', name, path, { data, method: Method.POST })
 }
 
+
+/**
+ * 生成六寸排版照
+ * @returns 
+ */
+export const GenerateLayoutPhoto = (data: any, name: string, path: string): Promise<any> => {
+  return uploadFile('/generate_layout_photos', name, path, { data, method: Method.POST })
+}
