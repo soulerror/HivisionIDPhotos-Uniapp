@@ -12,13 +12,13 @@
 		{
 			"path": "pages/photo/index",
 			"style": {
-				"navigationBarTitleText": "免费证件照制作"
+				"navigationBarTitleText": "最美AI证件照"
 			}
 		},
 		{
 			"path": "pages/photo/edit",
 			"style": {
-				"navigationBarTitleText": "免费证件照制作"
+				"navigationBarTitleText": "最美AI证件照"
 			}
 		},
 		{
@@ -30,7 +30,7 @@
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "免费证件照制作",
+		"navigationBarTitleText": "最美AI证件照",
 		"navigationBarBackgroundColor": "#F8F8F8",
 		"backgroundColor": "#F8F8F8"
 	},

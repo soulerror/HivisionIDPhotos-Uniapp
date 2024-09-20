@@ -4,18 +4,19 @@
 			<u-swiper :list="banners" class="banner" height="500rpx"></u-swiper>
 		</div>
 		<div class="tool-box">
-			<div @click="navigateToPhotoSelect(3)" class="size-1-card">
+			<div @click="navigateToPhotoSelect(11)" class="size-1-card">
 				<u-image src="@/static/example.jpeg" class="example-image" width="171rpx" height="240rpx" radius="10rpx" />
 				<div class="size-1-card-desc">一寸照
 					<img src="@/static/hot-tag.png" class="hot-tag shake-tag" />
 				</div>
 			</div>
 			<div class="size-other-box">
-				<div class="size-2-card" @click="navigateToPhotoSelect(4)">
+				<div class="size-2-card" @click="navigateToPhotoSelect(12)">
 					<span>二寸照</span>
 					<img src="@/static/hot-tag.png" class="hot-tag" />
 				</div>
-				<div class="size-2-card"><span>自定义尺寸</span> <img src="@/static/new.png" class="hot-tag" /></div>
+				<div class="size-2-card" @click="openCustomSize(true)"><span>自定义尺寸</span> <img src="@/static/new.png"
+						class="hot-tag" /></div>
 			</div>
 		</div>
 		<div class="selection-title">
@@ -23,22 +24,44 @@
 			<img src="@/static/hot-tag.png" class="hot-tag" />
 		</div>
 		<div class="photo-box">
-			<div :class="'photo-size-list' + ' rank' + index" v-for="(item, index) in data" :key="index"
-				@click="navigateToPhotoSelect(item.id)">
+			<div :class="'photo-size-list' + ' rank' + index" v-for="(item, index) in hostList" :key="index"
+				@click="navigateToPhotoSelect(item.id ? item.id : 1)">
 				<span>{{ numberCase(index) }}</span>{{ item.name }}
 			</div>
 		</div>
 		<!-- 底部自定义尺寸弹窗 -->
-		<u-popup :show="customSize" @close="close" @open="open">
+		<u-popup :show="customSize">
 			<view class="size-form-box">
-				<u-form>
-					<u-form-item label="高度">
-						<u-input type="number" placeholder="请输入内容" border="surround"></u-input>
+				<u-form label-width="120rpx" label-align="center" :model="customSizeForm" ref="sizeForm">
+					<u-form-item label="宽度" prop="width">
+						<u-input type="number" v-model="customSizeForm.width" :custom-style="{ width: '400rpx' }"
+							placeholder="请输入80-1200之间的数字">
+						</u-input>
+						<template slot="right">
+							<span>px</span>
+						</template>
 					</u-form-item>
-					<u-form-item label="宽度">
-						<u-input type="number" placeholder="请输入内容" border="surround"></u-input>
+					<u-form-item label="高度" prop="height">
+						<u-input type="number" v-model="customSizeForm.height" :custom-style="{ width: '400rpx' }"
+							placeholder="请输入80-1200之间的数字"></u-input>
+						<template slot="right">
+							<span>px</span>
+						</template>
+					</u-form-item>
+					<u-form-item label="尺寸">
+						<span slot="right">{{ mmHeight && mmWidth ? `${mmWidth} * ${mmHeight}` : '-' }} mm</span>
+					</u-form-item>
+					<u-form-item label="分辨率">
+						<span slot="right">{{ customSizeForm.dpi }} DPI</span>
 					</u-form-item>
 				</u-form>
+
+				<div class="size-form-box-btn">
+					<u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '20rpx', marginTop: '40rpx' }"
+						:plain="true" @click="openCustomSize(false)">取消自定义</u-button>
+					<u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '20rpx', marginTop: '40rpx' }"
+						@click="goToGenerate">去生成证件照</u-button>
+				</div>
 			</view>
 		</u-popup>
 	</view>
@@ -47,26 +70,31 @@
 <script lang="ts">
 import Vue from 'vue';
 import Card from '@/components/Card.vue'
-import { Component } from "vue-property-decorator";
+import { Component, Ref } from "vue-property-decorator";
 import { photoSizes, PhotoSize, getPhotoSize } from '@/model/PhotoSize'
 import { Mutation } from 'vuex-class';
 
+//300DPI时的换算系数
+const DPICoefficient = 25.4
+
 @Component({ components: { Card } })
 export default class Index extends Vue {
+	//轮播图
 	banners: Array<string> = [
 		'https://cdn.icuzz.com/photo/tiny-banner.png',
 	]
-	form: AnyObject = {
-		height: 413,
-		width: 295,
-		human_matting_model: "hivision_modnet",
-		face_detect_model: "mtcnn",
-		hd: false,
-		file: ''
+	//热门照片尺寸
+	hostList = photoSizes.slice(0, 10)
+	//自定义尺寸弹窗
+	customSize: boolean = false
+
+	customSizeForm: AnyObject = {
+		height: undefined,
+		width: undefined,
+		dpi: 300
 	}
-	data = photoSizes
-	preview: string = ''
-	// customSize: boolean = true
+
+	@Ref('sizeForm') readonly sizeForm!: HTMLFormElement
 
 	//设置vuex
 	@Mutation('SET_PHOTO_SIZE') setPhotoSize!: (data: PhotoSize) => void
@@ -76,12 +104,120 @@ export default class Index extends Vue {
 		const num = index + 1
 		return num >= 10 ? num.toString() : '0' + num
 	}
+
+	get mmWidth(): number {
+		const { customSizeForm } = this
+		return Math.round(customSizeForm.width * DPICoefficient / customSizeForm.dpi);
+	}
+
+	get mmHeight(): number {
+		const { customSizeForm } = this
+		return Math.round(customSizeForm.height * DPICoefficient / customSizeForm.dpi);
+	}
+
+	/**
+	 * 校验规则
+	 */
+	rules = {
+		height: [
+			{
+				required: true,
+				message: "请输入高度",
+				trigger: ['change', 'blur'],
+			},
+			{
+				type: 'integer',
+				message: "请输入整数",
+				trigger: ['change', 'blur'],
+			},
+			{
+				validator: (rule: any, value: any, callback: any) => {
+					if (Number(value) >= 80 && Number(value) <= 1200)
+						callback()
+					else
+						callback(new Error())
+				},
+				message: "高度应该在80-1200px之间",
+				trigger: ['change', 'blur'],
+			}
+		],
+		width: [
+			{
+				required: true,
+				message: "请输入宽度",
+				trigger: ['change', 'blur'],
+			},
+			{
+				type: 'integer',
+				message: "请输入整数",
+				trigger: ['change', 'blur'],
+			},
+			{
+				validator: (rule: any, value: any, callback: any) => {
+					if (Number(value) >= 80 && Number(value) <= 1200)
+						callback()
+					else
+						callback(new Error())
+				},
+				message: "宽度应该在80-1200px之间",
+				trigger: ['change', 'blur'],
+			}
+		]
+	}
+
+	mounted() {
+		this.sizeForm.setRules(this.rules);
+	}
+
+	/**
+	 * 
+	 * @param pxSize 将
+	 */
+	getMMSize(pxSize: number) {
+
+	}
+
+	openCustomSize(flag: boolean) {
+		this.customSize = flag
+	}
+
+	goToGenerate() {
+		const { mmHeight, mmWidth, customSizeForm: { height, width, dpi }, setPhotoSize } = this
+
+		this.sizeForm.validate((valid: boolean) => {
+			if (valid) {
+
+			} else {
+				uni.showToast({
+					title: "请按照规则填写宽度和高度"
+				})
+			}
+		}).then(() => {
+			const photoSize: PhotoSize = {
+				pxHeight: height,
+				pxWidth: width,
+				mmHeight: mmHeight,
+				mmWidth: mmWidth,
+				dpi: dpi
+			}
+			uni.navigateTo({
+				url: '/pages/photo/index',
+				success() {
+					setPhotoSize(photoSize)
+				}
+			})
+		}).catch((error: any) => {
+			uni.showToast({
+				title: error[0].message
+			})
+		})
+	}
 	/**
 	 * 跳转到图片选择页
 	 * @param id 图片大小配置的id
 	 */
 	navigateToPhotoSelect(id: number) {
-		const { setPhotoSize, data } = this
+		const { setPhotoSize } = this
 		const photoSize = getPhotoSize(id)
 		if (photoSize) {
 			uni.navigateTo({
@@ -251,8 +387,13 @@ $card-padding: 30rpx;
 	}
 
 	.size-form-box {
-		padding: 40rpx 60rpx;
-		padding-bottom: 0;
+		height: 500rpx;
+		padding: 40rpx 80rpx;
+		// padding-top: 80rpx;
+
+		.size-form-box-btn {
+			display: flex;
+		}
 	}
 
 	// 热门图标
@@ -261,41 +402,6 @@ $card-padding: 30rpx;
 		width: 54rpx;
 		overflow: hidden;
 		border-radius: 6rpx;
-	}
-
-	.shake-tag {
-		animation: shakeAndPause 1.5s steps(4, end) infinite;
-	}
-
-	/* 定义关键帧动画 */
-	@keyframes shakeAndPause {
-
-		0%,
-		5% {
-			transform: rotate(0deg);
-		}
-
-		5%,
-		10% {
-			transform: rotate(6deg);
-			/* 改变数值可以调整抖动的距离 */
-		}
-
-		10%,
-		15% {
-			transform: rotate(-6deg);
-		}
-
-		15%,
-		20% {
-			transform: rotate(6deg);
-			/* 改变数值可以调整抖动的距离 */
-		}
-
-		20%,
-		100% {
-			transform: rotate(0deg);
-		}
 	}
 }
 </style>

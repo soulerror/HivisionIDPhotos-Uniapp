@@ -31,11 +31,8 @@
         <div>支持保存电子排版照 <u-icon name="checkmark-circle-fill" color="#5ac725" /></div>
         <div>背景色
           <div class="color-dot-box">
-            <ColorDot color="#D9001B" class="color-dot" />
-            <ColorDot color="#02A7F0" class="color-dot" />
-            <ColorDot color="#FFFFFF" class="color-dot" />
-            <ColorDot color="#3492C4" class="color-dot" />
-            <ColorDot color="#3D99E2" class="color-dot" />
+
+            <ColorDot :color="item" v-for="(item, index) in colors" :key="index" class="color-dot" />
           </div>
         </div>
         <div>文件大小 <span>KB</span></div>
@@ -68,15 +65,17 @@ import { Component } from "vue-property-decorator";
 import { GeneratePhoto } from '@/api/photo'
 import { PhotoSize } from '@/model/PhotoSize'
 import { Getter } from 'vuex-class';
+import { Colors } from '@/model/Colors'
 
 @Component({ components: { Card, ColorDot } })
 export default class PhotoIndex extends Vue {
   form: AnyObject = {
-    height: 413,
-    width: 800,
+    height: 0,
+    width: 0,
     human_matting_model: "hivision_modnet",
     face_detect_model: "mtcnn"
   }
+  colors = Colors.slice(0, 5)
   //本地文件地址
   imagePath: string = ''
   //图片预览遮罩

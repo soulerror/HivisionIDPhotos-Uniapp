@@ -11,20 +11,25 @@
     <div class="selection-card">
       <p>颜色</p>
       <div class="color-list">
-        <div class="color-list-item" borderColor="#DCDFE6" @click="changeBackgroudColor('')"> <u-icon name="close"
-            size="40rpx" /></div>
         <div class="color-list-item" v-for="color in colors" :style="{ 'backgroundColor': color }"
           :borderColor="color == '#FFFFFF' ? '#DCDFE6' : ''" :key="color" :color="color"
           @click="changeBackgroudColor(color)"></div>
       </div>
     </div>
+
+    <u-form>
+      <u-form-item label="是否高清" label-width="80">
+        <u-switch v-model="isHd" activeColor="#F77261"></u-switch>
+      </u-form-item>
+    </u-form>
     <div class="selection-card selection-gap">
-      <p>是否高清</p>
-      <u-switch v-model="isHd" activeColor="#F77261"></u-switch>
+
+      <!-- <p>是否高清</p> -->
+
     </div>
     <div class="bottom-box">
       <u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '10rpx' }" :plain="true"
-        @click="saveLayoutPhotoToAlbum">保存冲印照片</u-button>
+        @click="generateLayoutPhoto">保存冲印照片</u-button>
       <u-button color="#F77261" :custom-style="{ width: '240rpx', borderRadius: '10rpx' }"
         @click="generateIDPhoto">保存证件照片</u-button>
     </div>
@@ -52,14 +57,14 @@ export default class PhotoEdit extends Vue {
   colors = { ...Colors }
   //换底证件照参数
   IDPhotoForm: AnyObject = {
-    color: '',
+    color: Colors[0],
     kb: undefined,
     render: 0
   }
   //图片背景色
   backgroundColor: string = ''
   //是否高清
-  isHd: boolean = false
+  isHd: boolean = true
   //照片设置
   photo: AnyObject = {}
   //证件照文件临时地址
@@ -108,55 +113,6 @@ export default class PhotoEdit extends Vue {
   changeBackgroudColor(color: string) {
     this.IDPhotoForm.color = color
   }
-
-  /**
- * 生成六寸排版照
- */
-  async generateLayoutPhoto() {
-    //先生成带底色证件照
-    await this.generateIDPhoto()
-    const that = this
-    const { photoSize, IDPhotoForm, idPhotoTempPath } = this
-    const form = {
-      height: photoSize.pxHeight,
-      with: photoSize.pxWidth,
-      kb: IDPhotoForm.kb
-    }
-    //请求生成排版照
-    await GenerateLayoutPhoto(form, 'input_image', idPhotoTempPath)
-      .then((res) => {
-        const layoutBase64 = res['image_base64']
-        if (layoutBase64 === undefined) {
-          return
-        }
-        const saveData = layoutBase64.replace(prefix, '')
-        //临时文件地址
-        const tempPath = `${wx.env.USER_DATA_PATH}/image${Date.now()}.png`;
-        const fs = uni.getFileSystemManager()
-        fs.writeFile({
-          filePath: tempPath,
-          data: saveData,
-          encoding: 'base64',
-          success() {
-            that.savePhotoToAlbum(tempPath)
-          }, fail(err) {
-            console.error("暂存文件到本地发生异常", err);
-            uni.showModal({
-              title: "保存失败",
-              content: `保存发生了异常,保存失败了哦~`
-            });
-          }
-        })
-      }).catch((err) => {
-        console.error("获取带背景色图片网络请求异常", err);
-        uni.showModal({
-          title: "保存失败",
-          content: `保存发生了异常,保存失败了哦~`,
-          showCancel: false,
-        });
-      })
-  }
-
   /**
    * 生成换底证件照
    */
@@ -205,11 +161,82 @@ export default class PhotoEdit extends Vue {
   }
 
   /**
+ * 生成六寸排版照
+ */
+  async generateLayoutPhoto() {
+    //先生成带底色证件照
+    const that = this
+    const { photoSize, IDPhotoForm, isHd, photo } = this
+    const layoutPhotoForm = {
+      height: photoSize.pxHeight,
+      width: photoSize.pxWidth,
+      kb: IDPhotoForm.kb
+    }
+
+    if (IDPhotoForm.kb === undefined) {
+      delete IDPhotoForm.kb
+      delete layoutPhotoForm.kb
+    }
+    //拷贝一下
+    const idFormCopy = cloneDeep(IDPhotoForm)
+    //去掉颜色的前缀
+    idFormCopy.color = idFormCopy.color.replace('#', '')
+    //根据选择查看是否生成高清图
+    const targetBase64 = isHd ? photo.base64Path : photo.base64HDPath
+    //获取带背景色的图
+    const { image_base64: colorBase64 } = await AddBackgroudColor(idFormCopy, 'input_image', targetBase64)
+    const handledColorBase64 = colorBase64.replace(prefix, "")
+    //指定路径缓存
+    const tempColorImagePath = `${wx.env.USER_DATA_PATH}/temp_color_image.png`;
+    const fs = uni.getFileSystemManager()
+    //将换底色图片写入本地临时目录
+    fs.writeFile({
+      filePath: tempColorImagePath,
+      data: handledColorBase64,
+      encoding: 'base64',
+      success() {
+        console.log("layoutPhotoForm", layoutPhotoForm);
+
+        //请求生成排版照
+        GenerateLayoutPhoto(layoutPhotoForm, 'input_image', tempColorImagePath)
+          .then((res) => {
+            const layoutBase64 = res['image_base64']
+            if (layoutBase64 === undefined) {
+              return
+            }
+            const saveData = layoutBase64.replace(prefix, '')
+            //临时文件地址
+            const tempPath = `${wx.env.USER_DATA_PATH}/image${Date.now()}.png`;
+            const fs = uni.getFileSystemManager()
+            fs.writeFile({
+              filePath: tempPath,
+              data: saveData,
+              encoding: 'base64',
+              success() {
+                that.savePhotoToAlbum(tempPath)
+              }, fail(err) {
+                console.error("暂存文件到本地发生异常", err);
+                uni.showModal({
+                  title: "保存失败",
+                  content: `保存发生了异常,保存失败了哦~`
+                });
+              }
+            })
+          }).catch((err) => {
+            console.error("获取带背景色图片网络请求异常", err);
+            uni.showModal({
+              title: "保存失败",
+              content: `保存发生了异常,保存失败了哦~`,
+              showCancel: false,
+            });
+          })
+      }
+    })
+  }
+  /**
    * 保存图片到相册
    */
   async savePhotoToAlbum(tempPath: string) {
-    console.log(tempPath, "tempPath");
-
     //查看用户是否授权保存相册
     // #ifndef MP-WEXIN
     uni.authorize({
@@ -303,7 +330,7 @@ export default class PhotoEdit extends Vue {
 
 .bottom-box {
   //减去父元素的padding
-  width: calc(100% - 40rpx);
+  width: calc(100% - (2 * $page-padding));
   position: absolute;
   bottom: 100rpx;
   display: flex;
@@ -316,6 +343,9 @@ export default class PhotoEdit extends Vue {
   line-height: 120rpx;
   gap: 30rpx;
   height: 120rpx;
+  flex-wrap: wrap;
+  margin-top: 40rpx;
+  margin-bottom: 60rpx;
 
   &-item {
     height: 60rpx;

@@ -1,0 +1,34 @@
+.shake-tag {
+    animation: shakeAndPause 1.5s steps(4, end) infinite;
+}
+
+/* 定义关键帧动画 */
+@keyframes shakeAndPause {
+
+    0%,
+    5% {
+        transform: rotate(0deg);
+    }
+
+    5%,
+    10% {
+        transform: rotate(6deg);
+        /* 改变数值可以调整抖动的距离 */
+    }
+
+    10%,
+    15% {
+        transform: rotate(-6deg);
+    }
+
+    15%,
+    20% {
+        transform: rotate(6deg);
+        /* 改变数值可以调整抖动的距离 */
+    }
+
+    20%,
+    100% {
+        transform: rotate(0deg);
+    }
+}
