@@ -23,7 +23,7 @@ const baseApi: { [key: string]: EnvironmentConfig } = {
   },
   // uniapp 正式环境
   production: {
-    host: "https://photo.icuzz.com",
+    host: "https://api.photo.icuzz.com",
   },
 };
 // 环境

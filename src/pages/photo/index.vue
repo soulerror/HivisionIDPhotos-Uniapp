@@ -64,8 +64,9 @@ import ColorDot from '@/components/ColorDot.vue'
 import { Component } from "vue-property-decorator";
 import { GeneratePhoto } from '@/api/photo'
 import { PhotoSize } from '@/model/PhotoSize'
-import { Getter } from 'vuex-class';
+import { Getter, Mutation } from 'vuex-class';
 import { Colors } from '@/model/Colors'
+import { PhotoPath } from "@/model/Interfaces";
 
 @Component({ components: { Card, ColorDot } })
 export default class PhotoIndex extends Vue {
@@ -82,8 +83,10 @@ export default class PhotoIndex extends Vue {
   show: boolean = false
   //加载动画
   loading: boolean = false
-
+  //获取图片配置
   @Getter('photoConfig') photoSize!: PhotoSize
+  //设置图片base64地址
+  @Mutation('SET_PHOTO_PATH') setPhotoPath!: (data: PhotoPath) => void
 
   mounted() {
   }
@@ -169,14 +172,15 @@ export default class PhotoIndex extends Vue {
       })
       .catch(err => console.log(err))
     //把处理后的base64存到本地
-    const Photo = {
+    const photoPath: PhotoPath = {
       base64: transparentBase64,
       base64HD: transparentBase64HD,
       base64Path: transparentBase64Path,
       base64HDPath: transparentBase64HDPath
     }
     //保存到本地
-    uni.setStorageSync('photo:transparent', Photo)
+    // uni.setStorageSync('photo:transparent', Photo)
+    this.setPhotoPath(photoPath)
     uni.navigateTo({
       url: '/pages/photo/edit',
       success: () => {

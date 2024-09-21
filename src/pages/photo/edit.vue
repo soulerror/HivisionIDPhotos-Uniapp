@@ -3,7 +3,7 @@
     <div class="preview-box">
       <div class="photo-box"
         :style="{ 'height': imageHeight, 'width': imageWidth, 'background-color': IDPhotoForm.color }">
-        <u-image class="photo" :src="isHd ? photo.base64HD : photo.base64" mode="aspectFit" :width="imageWidth"
+        <u-image class="photo" :src="isHd ? photoPath.base64HD : photoPath.base64" mode="aspectFit" :width="imageWidth"
           :height="imageHeight" />
       </div>
     </div>
@@ -46,9 +46,10 @@ import { Colors } from '@/model/Colors'
 import { Getter } from 'vuex-class';
 import { PhotoSize } from '@/model/PhotoSize';
 import { cloneDeep } from 'lodash'
+import { PhotoPath } from '@/model/Interfaces'
 
 //标准宽度
-const standard_width = 600;
+const standard_width = 700;
 //图片前缀
 const prefix = 'data:image/png;base64,'
 
@@ -65,20 +66,21 @@ export default class PhotoEdit extends Vue {
   backgroundColor: string = ''
   //是否高清
   isHd: boolean = true
-  //照片设置
-  photo: AnyObject = {}
   //证件照文件临时地址
   idPhotoTempPath: string = ''
   //排版照文件临时地址
   layoutPhotoTempPath: string = ''
+
   //vuex中的图片大小信息
   @Getter('photoConfig') photoSize!: PhotoSize
+  //vuex中存储的图片地址
+  @Getter('photoPath') photoPath!: PhotoPath
   /**
    * 计算照片高度
    */
   get imageHeight() {
     const { pxHeight, pxWidth } = this.photoSize
-    if (pxHeight > pxWidth) {
+    if (Number(pxHeight) > Number(pxWidth)) {
       return standard_width + 'rpx'
     }
     else {
@@ -92,7 +94,8 @@ export default class PhotoEdit extends Vue {
    */
   get imageWidth() {
     const { pxHeight, pxWidth } = this.photoSize
-    if (pxWidth > pxHeight) {
+    if (Number(pxWidth) > Number(pxHeight)) {
+      console.log(standard_width);
       return standard_width + 'rpx'
     }
     else {
@@ -103,7 +106,6 @@ export default class PhotoEdit extends Vue {
    * 页面加载时初始化
    */
   created() {
-    this.photo = uni.getStorageSync('photo:transparent')
   }
 
   /**
@@ -117,7 +119,10 @@ export default class PhotoEdit extends Vue {
    * 生成换底证件照
    */
   async generateIDPhoto() {
-    const { photo, IDPhotoForm, isHd } = this
+    uni.showLoading({
+      title: '正在处理中...'
+    });
+    const { photoPath: photo, IDPhotoForm, isHd } = this
     const that = this
     if (IDPhotoForm.kb === undefined) {
       delete IDPhotoForm.kb
@@ -158,15 +163,19 @@ export default class PhotoEdit extends Vue {
           showCancel: false,
         });
       })
+    uni.hideLoading()
   }
 
   /**
  * 生成六寸排版照
  */
   async generateLayoutPhoto() {
+    uni.showLoading({
+      title: '正在处理中...'
+    });
     //先生成带底色证件照
     const that = this
-    const { photoSize, IDPhotoForm, isHd, photo } = this
+    const { photoSize, IDPhotoForm, isHd, photoPath: photo } = this
     const layoutPhotoForm = {
       height: photoSize.pxHeight,
       width: photoSize.pxWidth,
@@ -195,8 +204,6 @@ export default class PhotoEdit extends Vue {
       data: handledColorBase64,
       encoding: 'base64',
       success() {
-        console.log("layoutPhotoForm", layoutPhotoForm);
-
         //请求生成排版照
         GenerateLayoutPhoto(layoutPhotoForm, 'input_image', tempColorImagePath)
           .then((res) => {

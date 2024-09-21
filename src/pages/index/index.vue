@@ -194,6 +194,7 @@ export default class Index extends Vue {
 			}
 		}).then(() => {
 			const photoSize: PhotoSize = {
+				name:"自定义尺寸",
 				pxHeight: height,
 				pxWidth: width,
 				mmHeight: mmHeight,
