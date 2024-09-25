@@ -5,25 +5,19 @@ interface EnvironmentConfig {
 const baseApi: { [key: string]: EnvironmentConfig } = {
   // 开发版
   development: {
-    // host: "http://10.0.12.108:8080",
     // host: "http://localhost:8080",
-    // host: "https://photo.icuzz.com"
-    //蚊子服务器
-    // host: "http://121.62.63.137:8199"
-    host: "https://api.photo.icuzz.com",
   },
   // 体验版
   trial: {
-    // host: "https://photo.icuzz.com",
-    host: "https://api.photo.icuzz.com",
+     host: "https://yourdomian.com",
   },
   // 正式版
   release: {
-    host: "https://api.photo.icuzz.com",
+     host: "https://yourdomian.com",
   },
   // uniapp 正式环境
   production: {
-    host: "https://api.photo.icuzz.com",
+    host: "https://yourdomian.com",
   },
 };
 // 环境
