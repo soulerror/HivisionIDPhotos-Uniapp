@@ -29,6 +29,8 @@
 - Vuex
 - Typescript
 - Uview
+#### 为什么不用Vue3?
+因为Uview对Vue3的支持不是很好...
 
 ## 📦 运行方法
 
