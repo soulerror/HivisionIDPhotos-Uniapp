@@ -5,7 +5,7 @@
 <p align="center"><img src="./src/assets/images/app_code_image.jpg"></p>
 
 
-# <p align="center">《最美AI证件照》</p>
+# <p align="center">《松鼠证件照》</p>
 <br>
 <br>
 <p align="center"><img src="./src/assets/images/app_screenshot.png"></p>
